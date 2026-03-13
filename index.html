@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bireshwar Chakravarty</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&family=Syne:wght@400;500;600;700;800&family=DM+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,300;1,400;1,600;1,700&family=Outfit:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -20,12 +20,12 @@
   --gold3:rgba(200,151,58,0.12);
   --gold4:rgba(200,151,58,0.06);
   --white:#f0ece4;
-  --muted:rgba(240,236,228,0.45);
-  --muted2:rgba(240,236,228,0.2);
-  --muted3:rgba(240,236,228,0.08);
-  --serif:'Cormorant',Georgia,serif;
-  --sans:'Syne',sans-serif;
-  --mono:'DM Mono',monospace;
+  --muted:rgba(240,236,228,0.72);
+  --muted2:rgba(240,236,228,0.48);
+  --muted3:rgba(240,236,228,0.15);
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'Outfit',sans-serif;
+  --mono:'Space Mono',monospace;
 }
 html{scroll-behavior:auto;font-size:16px}
 body{
@@ -65,7 +65,7 @@ nav{
 }
 nav.dark{background:rgba(6,6,8,.92);backdrop-filter:blur(16px);border-color:var(--line)}
 .nav-mark{
-  font-family:var(--serif);font-size:1.1rem;font-weight:600;
+  font-family:var(--serif);font-size:.78rem;font-weight:600;
   letter-spacing:.08em;color:var(--gold);
 }
 .nav-links{display:flex;gap:2.5rem;list-style:none}
@@ -109,7 +109,7 @@ nav.dark{background:rgba(6,6,8,.92);backdrop-filter:blur(16px);border-color:var(
   text-transform:uppercase;color:var(--gold);margin-bottom:1.75rem;
   opacity:0;animation:fu .6s ease .4s forwards;
 }
-.h-name-wrap{overflow:hidden;line-height:.9}
+.h-name-wrap{overflow:visible;line-height:1.0;padding:.08em 0}
 .h-name{
   font-family:var(--serif);
   font-size:clamp(5rem,9.5vw,11rem);
@@ -566,7 +566,7 @@ footer{
 
 <!-- NAV -->
 <nav id="nav">
-  <div class="nav-mark">BC</div>
+  <div class="nav-mark">Bireshwar Chakravarty</div>
   <ul class="nav-links">
     <li><a href="#about">Profile</a></li>
     <li><a href="#exp">Experience</a></li>
@@ -574,7 +574,7 @@ footer{
     <li><a href="#edu">Education</a></li>
     <li><a href="#con">Contact</a></li>
   </ul>
-  <a href="mailto:bireshwar.chakravarty@gmail.com" class="nav-btn">Connect</a>
+  <a href="/cdn-cgi/l/email-protection#402229322533283721326e2328212b3221362132343900272d21292c6e232f2d" class="nav-btn">Connect</a>
 </nav>
 
 <!-- HERO -->
@@ -928,7 +928,7 @@ footer{
     <div class="con-super">06 — Contact</div>
     <div class="con-head sr">Let's build<br><em>something bold.</em></div>
     <div class="con-list sr d1">
-      <a class="con-row" href="mailto:bireshwar.chakravarty@gmail.com"><span class="con-k">Email</span><span class="con-v">bireshwar.chakravarty@gmail.com</span></a>
+      <a class="con-row" href="/cdn-cgi/l/email-protection#6e0c071c0b1d06190f1c400d060f051c0f180f1c1a172e09030f0702400d0103"><span class="con-k">Email</span><span class="con-v"><span class="__cf_email__" data-cfemail="bbd9d2c9dec8d3ccdac995d8d3dad0c9dacddac9cfc2fbdcd6dad2d795d8d4d6">[email&#160;protected]</span></span></a>
       <a class="con-row" href="tel:+919971800625"><span class="con-k">Phone</span><span class="con-v">+91 99718 00625</span></a>
       <a class="con-row" href="https://linkedin.com/in/bireshwarchakravarty" target="_blank"><span class="con-k">LinkedIn</span><span class="con-v">linkedin.com/in/bireshwarchakravarty</span></a>
       <div class="con-row"><span class="con-k">Location</span><span class="con-v">Delhi NCR, India</span></div>
@@ -941,7 +941,7 @@ footer{
   <div class="ft-r">Director · Digital Strategy · Delhi NCR · 2026</div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // Cursor
 const cur=document.getElementById('cur'),cur2=document.getElementById('cur2');
 let mx=0,my=0,rx=0,ry=0;
@@ -989,10 +989,11 @@ document.querySelectorAll('.nums,.h-stats').forEach(el=>cObs.observe(el));
 // Horizontal drag scroll
 const hl=document.getElementById('hlO');
 let drag=false,sx,sl;
-hl.addEventListener('mousedown',e=>{drag=true;sx=e.pageX-hl.offsetLeft;sl=hl.scrollLeft;hl.style.userSelect='none'});
+hl.addEventListener('mousedown',e=>{drag=true;sx=e.pageX-hl.offsetLeft;sl=hl.scrollLeft});
 hl.addEventListener('mouseleave',()=>drag=false);
-hl.addEventListener('mouseup',()=>{drag=false;hl.style.userSelect=''});
-hl.addEventListener('mousemove',e=>{if(!drag)return;e.preventDefault();hl.scrollLeft=sl-(e.pageX-hl.offsetLeft-sx)*1.6});
-</script>
-</body>
-</html>
+hl.addEventListener('mouseup',()=>drag=false);
+hl.addEventListener('mousemove',e=>{if(!drag)return;e.preventDefault();const x=e.pageX-hl.offsetLeft;const walk=(x-sx)*2;hl.scrollLeft=sl-walk});
+
+// Fallback: reveal all .sr elements after a short delay in case IntersectionObserver doesn't fire
+setTimeout(()=>{document.querySelectorAll('.sr:not(.go)').forEach(el=>el.classList.add('go'))},600);
+</script></body></html>
