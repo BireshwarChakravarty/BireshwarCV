@@ -14,6 +14,8 @@ backup/
   index-original-2026-10-12.html   untouched copy of the page before the 2026-10 audit fixes
 ```
 
+Fonts (Playfair Display, Outfit, Space Mono) are self-hosted in `assets/fonts/`, so the page doesn't depend on Google Fonts and never flashes a fallback font.
+
 ## Editing
 
 - **Text:** edit `index.html` directly. The headline numbers (`data-count`) hold their final value in the HTML, and the count-up animation reads that value.
