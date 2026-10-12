@@ -34,661 +34,453 @@
 </script>
 <style>
 
+/* ═══════════ TOKENS ═══════════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#070503;
   --bg2:#0d0804;
   --bg3:#140d08;
-  --bg4:#1c1209;
-  --card:#0f0906;
   --o:#d6581d;
   --o2:#e8692f;
-  --o3:#8a3510;
-  --o-dim:rgba(214,88,29,0.14);
   --o-faint:rgba(214,88,29,0.06);
   --o-line:rgba(214,88,29,0.22);
   --o-line2:rgba(214,88,29,0.4);
   --cream:#f5efe6;
   --muted:rgba(245,239,230,0.7);
   --muted2:rgba(245,239,230,0.56);
-  --muted3:rgba(245,239,230,0.16);
-  --line:rgba(245,239,230,0.07);
-  --line2:rgba(245,239,230,0.12);
+  --line:rgba(245,239,230,0.08);
+  --line2:rgba(245,239,230,0.14);
   --serif:'Playfair Display',Georgia,serif;
   --sans:'Outfit',system-ui,sans-serif;
   --mono:'Space Mono',ui-monospace,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --gut:3rem;
 }
 html{font-size:16px;-webkit-text-size-adjust:100%}
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
-body{
-  background:var(--bg);color:var(--cream);
-  font-family:var(--sans);font-weight:400;
-  overflow-x:hidden;
-}
+body{background:var(--bg);color:var(--cream);font-family:var(--sans);font-weight:400;overflow-x:hidden}
 body::before{
-  content:'';position:fixed;inset:0;z-index:0;
+  content:'';position:fixed;inset:0;z-index:1000;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-  opacity:0.03;pointer-events:none;
+  opacity:.035;pointer-events:none;
 }
 h1,h2,h3{font-size:inherit;font-weight:inherit}
-ul{list-style:none}
+ol,ul{list-style:none}
 img{max-width:100%}
 a{color:inherit}
+button{font:inherit;color:inherit}
+::selection{background:var(--o);color:var(--bg)}
 :focus-visible{outline:2px solid var(--o2);outline-offset:3px}
-.skip{
-  position:fixed;top:.75rem;left:.75rem;z-index:10000;
-  padding:.6rem 1rem;background:var(--o);color:var(--bg);
-  font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;
-  transform:translateY(-200%);
-}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:fixed;top:.75rem;left:.75rem;z-index:10000;padding:.6rem 1rem;background:var(--o);color:var(--bg);font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transform:translateY(-200%)}
 .skip:focus{transform:none}
 main:focus{outline:none}
 
-/* CURSOR (only on devices with a fine pointer; enabled by JS) */
-#cur,#cur2{display:none;position:fixed;left:0;top:0;border-radius:50%;pointer-events:none;opacity:0;transition:opacity .2s}
-#cur{width:7px;height:7px;background:var(--o);z-index:9999;transition:width .15s,height .15s,opacity .2s}
-#cur2{width:32px;height:32px;border:1px solid rgba(214,88,29,.45);z-index:9998;transition:width .25s,height .25s,border-color .25s,opacity .2s}
+/* ═══════════ CURSOR ═══════════ */
+#cur,#cur2{display:none;position:fixed;left:0;top:0;border-radius:50%;pointer-events:none;opacity:0}
+#cur{width:7px;height:7px;background:var(--o);z-index:9999;transition:width .2s,height .2s,opacity .2s}
+#cur2{width:34px;height:34px;border:1px solid rgba(214,88,29,.5);z-index:9998;transition:width .3s var(--ease),height .3s var(--ease),border-color .3s,background .3s,opacity .2s}
 .cur-on #cur,.cur-on #cur2{display:block}
 .cur-on.cur-in #cur,.cur-on.cur-in #cur2{opacity:1}
 .cur-on.cur-in,.cur-on.cur-in *{cursor:none!important}
-.cur-hover #cur{width:12px;height:12px}
-.cur-hover #cur2{width:52px;height:52px;border-color:var(--o)}
+.cur-hover #cur{width:0;height:0}
+.cur-hover #cur2{width:64px;height:64px;border-color:var(--o);background:rgba(214,88,29,.12)}
 
-/* SCROLL PROGRESS */
+/* ═══════════ PROGRESS + NAV ═══════════ */
 #sprog{position:fixed;top:0;left:0;right:0;z-index:500;height:2px;pointer-events:none}
 #sprog-fill{height:100%;background:var(--o);transform:scaleX(0);transform-origin:left;will-change:transform}
-
-/* NAV */
 nav{
-  position:fixed;top:0;left:0;right:0;z-index:400;
-  height:64px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 3rem;transition:background .4s,border-color .4s;
+  position:fixed;top:0;left:0;right:0;z-index:400;height:64px;
+  display:flex;align-items:center;justify-content:space-between;gap:1.5rem;
+  padding:0 var(--gut);transition:background .4s,border-color .4s,transform .45s var(--ease);
   border-bottom:1px solid transparent;
 }
-nav.dark,nav.open{background:rgba(7,5,3,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-color:var(--o-line)}
-.nav-mark{font-family:var(--serif);font-size:.78rem;font-weight:600;letter-spacing:.08em;color:var(--cream);text-decoration:none}
-.nav-links{display:flex;gap:2.5rem}
-.nav-links a{
-  font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--muted);text-decoration:none;transition:color .2s;
-}
-.nav-links a:hover{color:var(--o2)}
-.nav-btn{
+nav.dark,nav.open{background:rgba(7,5,3,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-color:var(--o-line)}
+nav.hide:not(.open){transform:translateY(-100%)}
+.nav-mark{font-family:var(--serif);font-size:.82rem;font-weight:600;letter-spacing:.08em;color:var(--cream);text-decoration:none;white-space:nowrap}
+.nav-links{display:flex;gap:2.25rem}
+.nav-links a{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s;position:relative}
+.nav-links a::after{content:'';position:absolute;left:0;right:0;bottom:-6px;height:1px;background:var(--o);transform:scaleX(0);transform-origin:right;transition:transform .35s var(--ease)}
+.nav-links a:hover,.nav-links a.on{color:var(--cream)}
+.nav-links a:hover::after,.nav-links a.on::after{transform:scaleX(1);transform-origin:left}
+.nav-links .m-only{display:none}
+.nav-cta{display:flex;gap:.5rem}
+.btn{
+  display:inline-flex;align-items:center;gap:.6rem;
   font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;
-  padding:.55rem 1.4rem;border:1px solid var(--o);color:var(--cream);
-  background:rgba(7,5,3,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  transition:background .25s,color .25s;
+  padding:.65rem 1.25rem;border:1px solid var(--o);color:var(--cream);
+  background:rgba(7,5,3,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  cursor:pointer;transition:background .25s,color .25s,border-color .25s;white-space:nowrap;
 }
-.nav-btn:hover{background:var(--o);color:var(--bg)}
-.nav-toggle{
-  display:none;align-items:center;gap:.6rem;
-  font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--cream);background:rgba(7,5,3,.6);border:1px solid var(--o-line2);
-  padding:.55rem .9rem;cursor:pointer;
-}
+.btn:hover{background:var(--o);color:var(--bg)}
+.btn.ghost{border-color:var(--line2)}
+.btn.ghost:hover{border-color:var(--o)}
+.btn.big{font-size:.74rem;padding:1.05rem 1.6rem}
+.btn svg{width:12px;height:12px;flex-shrink:0}
+.mag{will-change:transform;transition:transform .5s var(--ease),background .25s,color .25s,border-color .25s}
+.nav-toggle{display:none;align-items:center;gap:.6rem;font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);background:rgba(7,5,3,.6);border:1px solid var(--o-line2);padding:.6rem .9rem;cursor:pointer}
 .nav-toggle-i{width:14px;height:8px;position:relative}
 .nav-toggle-i::before,.nav-toggle-i::after{content:'';position:absolute;left:0;right:0;height:1px;background:currentColor;transition:transform .25s}
 .nav-toggle-i::before{top:0}.nav-toggle-i::after{bottom:0}
 nav.open .nav-toggle-i::before{transform:translateY(3.5px) rotate(45deg)}
 nav.open .nav-toggle-i::after{transform:translateY(-3.5px) rotate(-45deg)}
 
-/* ═══════════════════════
-   HERO
-═══════════════════════ */
-.hero{
-  height:100vh;min-height:700px;
-  display:grid;grid-template-columns:52% 48%;
-  position:relative;overflow:hidden;
-}
+/* Side section index */
+.sidx{position:fixed;right:1.25rem;top:50%;transform:translateY(-50%);z-index:300;display:flex;flex-direction:column;gap:.9rem;opacity:0;pointer-events:none;transition:opacity .5s}
+.sidx.show{opacity:1;pointer-events:auto}
+.sidx a{display:flex;align-items:center;justify-content:flex-end;gap:.75rem;text-decoration:none;font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:transparent;transition:color .3s;padding:.15rem 0}
+.sidx a::after{content:'';width:14px;height:1px;background:var(--muted2);transition:width .35s var(--ease),background .3s}
+.sidx:hover a{color:var(--muted2)}
+.sidx:hover a.on,.sidx a:hover{color:var(--cream)}
+.sidx a.on::after{width:32px;background:var(--o)}
+
+/* ═══════════ HERO ═══════════ */
+.hero{min-height:max(720px,100vh);display:grid;grid-template-columns:52% 48%;position:relative;overflow:hidden}
 .hero-l{
   display:flex;flex-direction:column;justify-content:flex-end;
-  padding:5rem 3rem 5rem;
-  border-right:1px solid var(--o-line);
+  padding:8.5rem var(--gut) 3.5rem;border-right:1px solid var(--o-line);
   position:relative;z-index:2;min-width:0;
+  --sx:30%;--sy:60%;
+  background:radial-gradient(700px circle at var(--sx) var(--sy),rgba(214,88,29,.09),transparent 45%);
 }
-.hero-index{
-  position:absolute;top:5.5rem;left:3rem;
-  font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;
-  text-transform:uppercase;color:var(--muted2);
-  display:flex;align-items:center;gap:.9rem;
-}
+.hero-index{position:absolute;top:5.75rem;left:var(--gut);right:var(--gut);font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .9rem}
 .hero-index::before{content:'';width:24px;height:1px;background:var(--o);opacity:.6}
-.h-kicker{
-  font-family:var(--mono);font-size:.7rem;letter-spacing:.22em;
-  text-transform:uppercase;color:var(--o2);margin-bottom:1.75rem;
-  opacity:0;animation:fu .6s ease .4s forwards;
-}
+.avail{display:inline-flex;align-items:center;gap:.5rem;color:var(--muted)}
+.dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:ping 2s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(74,222,128,.55)}70%{box-shadow:0 0 0 9px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+.h-kicker{font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--o2);margin-bottom:1.75rem;opacity:0;animation:fu .6s ease .3s forwards}
+.rot{display:inline-grid;vertical-align:top;overflow:hidden}
+.rot>span{grid-area:1/1;transition:transform .7s var(--ease),opacity .5s}
+.rot>span:not(.on){opacity:0;transform:translateY(100%)}
+.rot>span.out{opacity:0;transform:translateY(-100%)}
 .h-title{font-family:var(--serif)}
-.h-name-wrap{display:block;overflow:visible;line-height:1.0;padding:.12em 0}
-.h-name{
-  font-family:var(--serif);
-  font-size:clamp(5rem,9.5vw,11rem);
-  font-weight:700;line-height:.88;letter-spacing:-.025em;
-  display:block;opacity:0;transform:translateY(18px);
-  animation:su .9s cubic-bezier(.16,1,.3,1) .55s forwards;
-}
-.h-name.ital{
-  font-style:italic;font-weight:400;color:var(--muted);
-  animation-delay:.7s;
-}
-.h-rule{
-  width:64px;height:2px;background:var(--o);
-  margin:2.25rem 0;opacity:0;animation:fu .5s ease 1s forwards;
-}
-.h-sub{
-  font-family:var(--serif);font-size:clamp(.95rem,1.3vw,1.15rem);
-  font-weight:400;font-style:italic;line-height:1.7;color:var(--muted);
-  max-width:400px;margin-bottom:3rem;
-  opacity:0;animation:fu .6s ease 1.1s forwards;
-}
-.h-stats{
-  display:grid;grid-template-columns:repeat(4,auto);
-  gap:0;width:fit-content;
-  border:1px solid var(--o-line);
-  opacity:0;animation:fu .6s ease 1.25s forwards;
-}
+.h-name-wrap{display:block;overflow:hidden;padding:.06em .1em .16em 0;margin-bottom:-.12em}
+.h-name{display:block;white-space:nowrap;font-size:clamp(4.5rem,8.6vw,10.5rem);font-weight:700;line-height:.88;letter-spacing:-.025em;opacity:0;transform:translateY(18px);animation:su .9s var(--ease) .5s forwards}
+.h-name.ital{font-style:italic;font-weight:400;color:var(--muted);animation-delay:.65s}
+.split .h-name{opacity:1;transform:none;animation:none}
+.ch{display:inline-block;transform:translateY(115%) rotate(8deg);transform-origin:left bottom;animation:chIn 1s var(--ease) forwards;animation-delay:calc(.45s + var(--i)*38ms)}
+@keyframes chIn{to{transform:none}}
+.h-rule{width:64px;height:2px;background:var(--o);margin:2rem 0;transform-origin:left;transform:scaleX(0);animation:grow .8s var(--ease) 1.1s forwards}
+@keyframes grow{to{transform:scaleX(1)}}
+.h-sub{font-family:var(--serif);font-size:clamp(1rem,1.3vw,1.18rem);font-style:italic;line-height:1.7;color:var(--muted);max-width:420px;margin-bottom:2.5rem;opacity:0;animation:fu .6s ease 1.15s forwards}
+.h-stats{display:grid;grid-template-columns:repeat(4,auto);width:fit-content;border:1px solid var(--o-line);opacity:0;animation:fu .6s ease 1.3s forwards}
 .h-stat{padding:1rem 1.5rem;border-right:1px solid var(--o-line);text-align:center}
 .h-stat:last-child{border-right:none}
-.h-sn{font-family:var(--serif);font-size:1.8rem;font-weight:700;color:var(--o2);line-height:1}
+.h-sn{font-family:var(--serif);font-size:1.8rem;font-weight:700;color:var(--o2);line-height:1;font-variant-numeric:tabular-nums}
 .h-sl{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-top:.35rem}
+.live{display:flex;align-items:center;flex-wrap:wrap;gap:.35rem .7rem;margin-top:1.25rem;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);opacity:0;animation:fu .6s ease 1.5s forwards}
+.live-tag{display:inline-flex;align-items:center;gap:.45rem;color:var(--o2)}
+.live-tag .dot{background:var(--o);animation-name:pingO}
+@keyframes pingO{0%{box-shadow:0 0 0 0 rgba(214,88,29,.6)}70%{box-shadow:0 0 0 9px rgba(214,88,29,0)}100%{box-shadow:0 0 0 0 rgba(214,88,29,0)}}
+.live-n{font-family:var(--serif);font-size:1.15rem;letter-spacing:0;text-transform:none;color:var(--cream);font-variant-numeric:tabular-nums;display:inline-block;min-width:5ch}
+html:not(.js) .live{display:none}
 
-/* RIGHT PHOTO */
-.hero-r{
-  position:relative;overflow:hidden;
-  clip-path:inset(0 100% 0 0);
-  animation:revealR .9s cubic-bezier(.77,0,.18,1) .35s forwards;
-  background:#1a0d06;
-}
+.hero-r{position:relative;overflow:hidden;clip-path:inset(0 100% 0 0);animation:revealR 1s cubic-bezier(.77,0,.18,1) .25s forwards;background:#1a0d06;--mx:0;--my:0}
 .hero-r picture,.con-photo picture{display:block;height:100%}
-.hero-r img{
-  width:100%;height:100%;object-fit:cover;object-position:center 18%;display:block;
-  transform:scale(1.05);
-  animation:pzoom 1.6s cubic-bezier(.16,1,.3,1) .35s forwards;
-}
-.hero-r-grad{
-  position:absolute;inset:0;z-index:2;
-  background:
-    linear-gradient(to left,transparent 30%,rgba(7,5,3,.35) 100%),
-    linear-gradient(to bottom,rgba(7,5,3,.15) 0%,transparent 20%,transparent 70%,rgba(7,5,3,.7) 100%);
-}
-.hero-r-tag{
-  position:absolute;bottom:2.5rem;right:2rem;z-index:3;
-  font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;
-  text-transform:uppercase;color:rgba(245,239,230,.75);
-  writing-mode:vertical-rl;transform:rotate(180deg);
-}
-.hero-ghost{
-  position:absolute;bottom:-5rem;right:-.05em;
-  font-family:var(--serif);font-size:clamp(18rem,28vw,34rem);
-  font-weight:700;font-style:italic;
-  color:rgba(214,88,29,.025);line-height:1;
-  pointer-events:none;user-select:none;z-index:1;
-}
-.hero-scroll{
-  position:absolute;bottom:1.5rem;left:3rem;
-  font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;
-  text-transform:uppercase;color:var(--muted2);
-  display:flex;align-items:center;gap:.75rem;
-  opacity:0;animation:fu .6s ease 1.5s forwards;
-}
-.hero-scroll-line{width:1px;height:32px;background:linear-gradient(to bottom,var(--o),transparent);animation:scrollLine 1.8s ease-in-out 1.5s infinite}
-@keyframes scrollLine{0%,100%{transform:scaleY(1);opacity:.4}50%{transform:scaleY(.5);opacity:1}}
+.hero-r img{width:100%;height:100%;object-fit:cover;object-position:center 18%;display:block;transform:translate(calc(var(--mx)*-14px),calc(var(--my)*-10px)) scale(1.08);transition:transform 1.2s var(--ease)}
+.hero-r-grad{position:absolute;inset:0;z-index:2;background:linear-gradient(to left,transparent 30%,rgba(7,5,3,.35) 100%),linear-gradient(to bottom,rgba(7,5,3,.15) 0%,transparent 20%,transparent 70%,rgba(7,5,3,.7) 100%)}
+.hero-r-tag{position:absolute;bottom:2.5rem;right:2rem;z-index:3;font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,239,230,.75);writing-mode:vertical-rl;transform:rotate(180deg)}
+.hero-ghost{position:absolute;bottom:-5rem;right:-.05em;font-family:var(--serif);font-size:clamp(18rem,28vw,34rem);font-weight:700;font-style:italic;color:rgba(214,88,29,.03);line-height:1;pointer-events:none;user-select:none;z-index:-1}
 
-/* ══════════════════
-   TICKER  (orange band)
-══════════════════ */
-.ticker{
-  overflow:hidden;padding:.85rem 0;white-space:nowrap;
-  position:relative;z-index:2;background:var(--o);
-}
-.ticker-inner{display:inline-flex;animation:tick 28s linear infinite}
-.ticker:hover .ticker-inner{animation-play-state:paused}
-.t-item{
-  font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--bg);padding:0 2rem;
-  display:flex;align-items:center;gap:.75rem;
-}
-.t-item::before{content:'✦';color:rgba(7,5,3,.4);font-size:.42rem}
+/* ═══════════ TICKER ═══════════ */
+.ticker{overflow:hidden;padding:.9rem 0;white-space:nowrap;position:relative;z-index:2;background:var(--o)}
+.ticker-inner{display:inline-flex;will-change:transform}
+html:not(.js) .ticker-inner{animation:tick 30s linear infinite}
+.t-item{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--bg);padding:0 2rem;display:flex;align-items:center;gap:.75rem}
+.t-item::before{content:'✦';color:rgba(7,5,3,.45);font-size:.45rem}
 
-/* ══════════════════
-   SECTION COMMONS
-══════════════════ */
-.sec{padding:8rem 3rem;border-top:1px solid var(--line);position:relative;overflow:hidden}
-.sec-bg-num{
-  position:absolute;right:-0.02em;bottom:-.1em;
-  font-family:var(--serif);font-size:clamp(12rem,22vw,26rem);
-  font-weight:700;font-style:italic;
-  color:rgba(214,88,29,.035);line-height:1;
-  pointer-events:none;user-select:none;
-}
-.sec-eyebrow{
-  display:flex;align-items:center;gap:1rem;margin-bottom:5rem;
-}
+/* ═══════════ SECTION COMMONS ═══════════ */
+.sec{padding:9rem var(--gut);border-top:1px solid var(--line);position:relative;overflow:hidden}
+@supports (overflow:clip){.sec{overflow:clip}}
+.sec-bg-num{position:absolute;right:-0.02em;bottom:-.12em;font-family:var(--serif);font-size:clamp(12rem,22vw,26rem);font-weight:700;font-style:italic;color:rgba(214,88,29,.035);line-height:1;pointer-events:none;user-select:none}
+.sec-eyebrow{display:flex;align-items:center;gap:1rem;margin-bottom:4rem}
 .s-num{font-family:var(--mono);font-size:.64rem;letter-spacing:.2em;color:var(--muted2)}
 .s-line{flex:1;height:1px;background:linear-gradient(to right,var(--o-line2),transparent);max-width:60px}
 .s-label{font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--o2)}
-.disp{
-  font-family:var(--serif);font-size:clamp(2.8rem,5.5vw,6rem);
-  font-weight:700;line-height:1;letter-spacing:-.02em;
-}
+.disp{font-family:var(--serif);font-size:clamp(2.8rem,5.5vw,6rem);font-weight:700;line-height:1;letter-spacing:-.02em}
 .disp em{font-style:italic;font-weight:400;color:var(--muted)}
 
-/* ══════════════════
-   ABOUT
-══════════════════ */
-.about-layout{display:grid;grid-template-columns:1fr 1fr;gap:5rem;margin-top:5rem}
-.about-quote{
-  font-family:var(--serif);font-size:1.15rem;font-style:italic;
-  font-weight:400;line-height:1.75;color:var(--muted);
-  border-left:2px solid var(--o);padding-left:1.5rem;
-  margin-bottom:2.5rem;
-}
-.about-body p{
-  font-family:var(--sans);font-size:.92rem;font-weight:400;
-  line-height:1.85;color:var(--muted);margin-bottom:1.25rem;
-}
+/* ═══════════ ABOUT / MANIFESTO ═══════════ */
+.manifesto{font-family:var(--serif);font-size:clamp(1.6rem,3.1vw,3rem);line-height:1.28;letter-spacing:-.01em;max-width:22em;margin-top:4.5rem}
+.manifesto .w{transition:opacity .35s}
+.js .manifesto .w{opacity:.16}
+.js .manifesto .w.on{opacity:1}
+.manifesto em{font-style:italic;color:var(--o2)}
+.about-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:5rem;margin-top:6rem}
+.about-body p{font-size:.95rem;line-height:1.85;color:var(--muted);margin-bottom:1.25rem}
 .about-body p:last-child{margin-bottom:0}
 .about-body strong{font-weight:600;color:var(--cream)}
-.trait-head,.cap-head{
-  font-family:var(--mono);font-size:.64rem;letter-spacing:.2em;
-  text-transform:uppercase;color:var(--muted2);
-  margin-bottom:1.25rem;padding-bottom:.6rem;
-  border-bottom:1px solid var(--line);
-}
+.trait-head,.cap-head{font-family:var(--mono);font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);margin-bottom:1.25rem;padding-bottom:.6rem;border-bottom:1px solid var(--line)}
 .cap-head{margin-top:2.5rem}
-.traits{display:flex;flex-direction:column;gap:.65rem;margin-bottom:.5rem}
-.trait{
-  font-family:var(--sans);font-size:.86rem;font-weight:400;
-  line-height:1.5;color:var(--muted);
-  display:flex;align-items:center;gap:.75rem;
-}
+.traits{display:flex;flex-direction:column;gap:.65rem}
+.trait{font-size:.88rem;line-height:1.5;color:var(--muted);display:flex;align-items:center;gap:.75rem}
 .trait::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--o);flex-shrink:0}
-.caps{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.25rem}
-.cap{
-  font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;
-  padding:.4rem .85rem;border:1px solid var(--o-line);color:var(--muted);
-  transition:border-color .2s,color .2s,background .2s;
-}
+.caps{display:flex;flex-wrap:wrap;gap:.4rem}
+.cap{font-family:var(--mono);font-size:.66rem;letter-spacing:.04em;padding:.45rem .85rem;border:1px solid var(--o-line);color:var(--muted);transition:border-color .2s,color .2s,background .2s}
 .cap:hover{border-color:var(--o);color:var(--o2);background:var(--o-faint)}
 
-/* ══════════════════
-   NUMBERS BAR
-══════════════════ */
-.nums{
-  display:grid;grid-template-columns:repeat(5,1fr);
-  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-  background:var(--bg2);
-}
-.n-cell{
-  padding:3rem 2.5rem;border-right:1px solid var(--line);
-  display:flex;flex-direction:column;align-items:flex-start;
-}
-.n-cell:last-child{border-right:none}
-.n-val{
-  font-family:var(--serif);font-size:2.5rem;font-weight:700;
-  color:var(--o2);line-height:1;margin-bottom:.6rem;
-}
-.n-lab{
-  font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--muted2);line-height:1.6;
-}
+/* ═══════════ SCALE ═══════════ */
+.scale{padding:7rem var(--gut);background:var(--bg2);border-top:1px solid var(--line)}
+.scale-head{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;margin-bottom:3.5rem}
+.scale-head .disp{font-size:clamp(2.2rem,4vw,4rem)}
+.scale-note{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);max-width:22rem;text-align:right;line-height:1.7}
+.scale-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line)}
+.sc{padding:2.75rem 2.5rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);position:relative}
+.sc:nth-child(3n){border-right:none}
+.sc:nth-last-child(-n+3){border-bottom:none}
+.sc-v{font-family:var(--serif);font-size:clamp(3rem,5.2vw,5.2rem);font-weight:700;line-height:1;color:var(--o2);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.sc-l{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cream);margin-top:1rem}
+.sc-c{font-size:.86rem;line-height:1.6;color:var(--muted2);margin-top:.5rem;max-width:22rem}
 
-/* ══════════════════
-   EXPERIENCE
-══════════════════ */
-.exp-list{border-top:1px solid var(--line)}
-.exp-row{
-  border-bottom:1px solid var(--line);
-  transition:background .2s;
-  position:relative;
-}
-.exp-row::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
-  background:var(--o);transform:scaleY(0);transform-origin:top;
-  transition:transform .3s ease;
-}
-.exp-row:hover{background:rgba(214,88,29,.04)}
-.exp-row:hover::before,.exp-row.open::before{transform:scaleY(1)}
-.exp-top{
-  display:grid;grid-template-columns:240px 1fr 180px 40px;
-  padding:1.75rem 0 1.75rem 1.5rem;align-items:center;
-  width:100%;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer;
-}
-.exp-top:focus-visible{outline-offset:-2px}
-.e-co{
-  display:block;font-family:var(--serif);font-size:1.05rem;font-weight:700;
-  padding-right:1.5rem;
-}
-.e-per{
-  font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;font-weight:400;
-  color:var(--muted2);margin-top:.3rem;display:block;
-}
-.e-role{
-  display:block;font-family:var(--serif);font-size:1rem;font-style:italic;
-  font-weight:400;color:var(--muted);padding-right:1.5rem;
-}
-.e-loc{display:block;font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;color:var(--muted2)}
-.e-arr{
-  width:32px;height:32px;border:1px solid var(--o-line);
-  display:flex;align-items:center;justify-content:center;
-  font-size:.85rem;color:var(--muted2);transition:all .3s;
-  margin-right:1.5rem;
-}
-.exp-row:hover .e-arr{border-color:var(--o);color:var(--o2)}
-.exp-row.open .e-arr{background:var(--o);color:var(--bg);border-color:var(--o);transform:rotate(90deg)}
-.js .exp-body{
-  max-height:0;overflow:hidden;visibility:hidden;
-  transition:max-height .45s cubic-bezier(.4,0,.2,1),visibility 0s linear .45s;
-}
-.js .exp-row.open .exp-body{
-  max-height:60rem;visibility:visible;
-  transition:max-height .45s cubic-bezier(.4,0,.2,1),visibility 0s;
-}
-.exp-body-in{
-  display:grid;grid-template-columns:1fr 1fr;gap:.5rem 3rem;
-  padding:1.5rem 1.5rem 2rem 1.5rem;
-  background:linear-gradient(to bottom,rgba(214,88,29,.04),transparent);
-  border-top:1px solid var(--o-line);
-}
-.eb{
-  font-family:var(--sans);font-size:.86rem;font-weight:400;
-  line-height:1.65;color:var(--muted);
-  padding-left:1.1rem;position:relative;
-}
-.eb::before{content:'–';position:absolute;left:0;color:var(--o);font-size:.75rem;top:.05rem}
+/* ═══════════ EXPERIENCE TIMELINE ═══════════ */
+.exp-intro{font-size:1rem;font-weight:300;color:var(--muted);line-height:1.7;margin:2.5rem 0 4rem;padding-top:2rem;border-top:1px solid var(--o-line);max-width:40rem}
+.tl{display:grid;grid-template-columns:minmax(220px,30%) 1fr;gap:4rem;align-items:start}
+.tl-side{align-self:stretch}
+.tl-sticky{position:sticky;top:7rem}
+.tl-year{font-family:var(--serif);font-size:clamp(5rem,9vw,9.5rem);font-weight:700;font-style:italic;line-height:1;color:var(--o2);letter-spacing:-.03em;font-variant-numeric:tabular-nums;overflow:hidden;padding-right:.1em}
+.tl-year span{display:block;transition:transform .6s var(--ease),opacity .45s}
+.tl-year span.flip{transform:translateY(45%);opacity:0;transition:none}
+.tl-co{font-family:var(--serif);font-size:1.35rem;font-weight:700;margin-top:1rem;min-height:1.6em}
+.tl-role{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:1rem;margin-top:.25rem;min-height:3em}
+.tl-bar{height:2px;background:var(--line);margin-top:2rem;position:relative;overflow:hidden}
+.tl-bar span{position:absolute;inset:0;background:var(--o);transform-origin:left;transform:scaleX(0)}
+.tl-count{font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;color:var(--muted2);margin-top:.9rem}
+.tl-list{border-top:1px solid var(--line)}
+.tl-item{padding:2.5rem 0 2.5rem 2rem;border-bottom:1px solid var(--line);position:relative;transition:background .3s}
+.tl-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--o);transform:scaleY(0);transform-origin:top;transition:transform .5s var(--ease)}
+.tl-item.on::before,.tl-item:hover::before{transform:scaleY(1)}
+.tl-item:hover{background:rgba(214,88,29,.03)}
+.tl-meta{display:flex;flex-wrap:wrap;gap:.4rem 1.25rem;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:.9rem}
+.tl-meta .n{color:var(--o2)}
+.tl-h{margin-bottom:1.25rem}
+.tl-company{display:block;font-family:var(--serif);font-size:clamp(1.6rem,2.4vw,2.2rem);font-weight:700;line-height:1.1;letter-spacing:-.01em}
+.tl-rl{display:block;font-family:var(--serif);font-style:italic;font-size:1.05rem;color:var(--muted);margin-top:.35rem}
+.tl-b{display:grid;grid-template-columns:1fr 1fr;gap:.6rem 2.5rem}
+.eb{font-size:.88rem;line-height:1.65;color:var(--muted);padding-left:1.1rem;position:relative}
+.eb::before{content:'–';position:absolute;left:0;color:var(--o)}
 .eb strong{font-weight:600;color:var(--cream)}
 
-/* Exp intro line */
-.exp-intro{
-  font-family:var(--sans);font-size:.95rem;font-weight:300;
-  color:var(--muted);line-height:1.7;
-  margin-bottom:3rem;padding-top:2rem;
-  border-top:1px solid var(--o-line);
-}
+/* ═══════════ CARDS (spotlight) ═══════════ */
+.card{position:relative;overflow:hidden;background:var(--bg2);padding:2.5rem 2.25rem;display:flex;flex-direction:column;--x:-999px;--y:-999px;isolation:isolate}
+.card::before{content:'';position:absolute;inset:0;z-index:-1;background:radial-gradient(420px circle at var(--x) var(--y),rgba(214,88,29,.13),transparent 45%)}
+.card::after{content:'';position:absolute;inset:0;pointer-events:none;border:1px solid transparent;background:radial-gradient(260px circle at var(--x) var(--y),rgba(232,105,47,.7),transparent 45%) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) padding-box exclude,linear-gradient(#000 0 0)}
 
-/* ══════════════════
-   HIGHLIGHTS CAROUSEL
-══════════════════ */
-.hl-ctrl{
-  display:flex;align-items:center;justify-content:flex-end;gap:.5rem;margin-top:3rem;
-  font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);
-}
-.hl-ctrl span{margin-right:auto}
-.hl-btn{
-  width:40px;height:40px;border:1px solid var(--o-line2);background:transparent;color:var(--cream);
-  font-size:1rem;cursor:pointer;transition:background .2s,color .2s,border-color .2s,opacity .2s;
-}
-.hl-btn:hover:not(:disabled){background:var(--o);border-color:var(--o);color:var(--bg)}
-.hl-btn:disabled{opacity:.3;cursor:default}
-html:not(.js) .hl-btn{display:none}
-.hl-outer{overflow-x:auto;cursor:grab;border-top:1px solid var(--o-line);border-bottom:1px solid var(--line);margin-top:1rem;scrollbar-color:var(--o) transparent}
-.hl-outer.dragging{cursor:grabbing;user-select:none}
-.hl-outer:focus-visible{outline-offset:-2px}
-.hl-outer::-webkit-scrollbar{height:4px}
-.hl-outer::-webkit-scrollbar-thumb{background:var(--o)}
-.hl-track{display:flex;width:max-content}
-.hl-card{
-  width:340px;flex-shrink:0;padding:3rem 2.5rem;
-  border-right:1px solid var(--line);
-  background:var(--bg2);
-  position:relative;overflow:hidden;
-  transition:background .25s;
-}
-.hl-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--o);transform:scaleX(0);transform-origin:left;
-  transition:transform .35s ease;
-}
-.hl-card:hover{background:var(--bg3)}
-.hl-card:hover::before{transform:scaleX(1)}
-.hl-n{
-  position:absolute;top:1.5rem;right:1.75rem;
-  font-family:var(--serif);font-size:4rem;font-weight:700;
-  color:rgba(214,88,29,.12);line-height:1;
-}
-.hl-cat{
-  font-family:var(--mono);font-size:.64rem;letter-spacing:.18em;
-  text-transform:uppercase;color:var(--o2);margin-bottom:1.5rem;
-}
-.hl-t{
-  font-family:var(--serif);font-size:1.2rem;font-weight:700;
-  line-height:1.25;margin-bottom:.9rem;
-}
-.hl-b{
-  font-family:var(--sans);font-size:.84rem;font-weight:400;
-  line-height:1.75;color:var(--muted);
-}
+/* ═══════════ BENTO (HIGHLIGHTS) ═══════════ */
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:4.5rem}
+.bento .card{min-height:270px}
+.c-n{position:absolute;top:1.5rem;right:1.75rem;font-family:var(--serif);font-size:3.4rem;font-weight:700;color:rgba(214,88,29,.12);line-height:1}
+.c-cat{font-family:var(--mono);font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--o2);margin-bottom:1.5rem}
+.c-big{font-family:var(--serif);font-weight:700;color:var(--cream);line-height:.95;letter-spacing:-.03em;font-size:clamp(3.4rem,6vw,6.8rem);margin:auto 0 1.25rem}
+.c-big.it{font-style:italic;font-weight:400;font-size:clamp(2.4rem,3.6vw,3.6rem);color:var(--o2)}
+.c-t{font-family:var(--serif);font-size:1.25rem;font-weight:700;line-height:1.25;margin-bottom:.8rem;margin-top:auto}
+.c-big+.c-t{margin-top:0}
+.c-b{font-size:.86rem;line-height:1.7;color:var(--muted)}
+.card.xl{grid-column:span 2;grid-row:span 2}
+.card.xl .c-b{font-size:.95rem;max-width:30rem}
+.card.xl .c-big{font-size:clamp(4.5rem,9vw,9.5rem);margin-top:auto}
+.c-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.5rem}
+.c-tags li{font-family:var(--mono);font-size:.64rem;letter-spacing:.12em;padding:.4rem .75rem;border:1px solid var(--o-line);color:var(--muted)}
+.card.w2{grid-column:span 2}
+.card.w4{grid-column:span 4;flex-direction:row;align-items:center;gap:3rem;min-height:0}
+.card.w4 .c-cat{margin:0}
+.card.w4 .c-t{margin:0;font-size:1.6rem}
+.card.w4 .c-b{max-width:34rem;margin-left:auto}
 
-/* ══════════════════
-   CLIENTS
-══════════════════ */
-.clients-sec{background:var(--bg2);padding:5rem 3rem;border-top:1px solid var(--line)}
-.cl-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);margin-bottom:3rem}
-.cl-grid{display:flex;flex-wrap:wrap;border:1px solid var(--line)}
-.cl-item{
-  font-family:var(--serif);font-size:.95rem;font-weight:700;
-  padding:.9rem 1.6rem;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
-  transition:background .2s,color .2s;
-}
-.cl-item:hover{background:var(--o);color:var(--bg)}
+/* ═══════════ CLIENTS MARQUEE ═══════════ */
+.clients{padding:6rem 0;background:var(--bg2);border-top:1px solid var(--line);overflow:hidden}
+.cl-head{padding:0 var(--gut);display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin-bottom:3rem}
+.cl-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2)}
+.cl-count{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:1.05rem}
+.mq{display:flex;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.mq+.mq{margin-top:1rem}
+.mq-track{display:flex;flex-shrink:0;gap:1rem;padding-right:1rem;animation:mq 60s linear infinite}
+.mq.rev .mq-track{animation-direction:reverse;animation-duration:70s}
+.mq:hover .mq-track{animation-play-state:paused}
+@keyframes mq{to{transform:translateX(-100%)}}
+.mq-i{font-family:var(--serif);font-size:clamp(1.3rem,2.4vw,2.2rem);font-weight:700;white-space:nowrap;padding:.6rem 1.6rem;border:1px solid var(--line);color:var(--muted);transition:color .25s,border-color .25s,background .25s}
+.mq-i:nth-child(3n+2){font-style:italic;font-weight:400}
+.mq-i:hover{color:var(--bg);background:var(--o);border-color:var(--o)}
 
-/* ══════════════════
-   EDUCATION
-══════════════════ */
-.edu-cards{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);margin-top:4rem}
-.edu-c{
-  padding:3rem 2.5rem;border-right:1px solid var(--line);
-  background:var(--bg2);position:relative;overflow:hidden;
-  transition:background .25s;
-}
-.edu-c:last-child{border-right:none}
-.edu-c:hover{background:var(--bg3)}
-.edu-c::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;
-  height:2px;background:var(--o);
-  transform:scaleX(0);transform-origin:left;transition:transform .4s ease;
-}
-.edu-c:hover::after{transform:scaleX(1)}
-.edu-ghost{
-  position:absolute;bottom:-.5rem;right:.5rem;
-  font-family:var(--serif);font-size:7rem;font-weight:700;
-  color:rgba(214,88,29,.07);line-height:1;pointer-events:none;
-}
+/* ═══════════ EDUCATION ═══════════ */
+.edu-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:4rem}
+.edu-ghost{position:absolute;bottom:-.5rem;right:.75rem;font-family:var(--serif);font-size:7rem;font-weight:700;color:rgba(214,88,29,.07);line-height:1;pointer-events:none;z-index:-1}
 .edu-yr{font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;color:var(--o2);margin-bottom:1.25rem}
-.edu-d{font-family:var(--serif);font-size:1.05rem;font-weight:700;line-height:1.3;margin-bottom:.6rem}
-.edu-i{font-family:var(--sans);font-size:.84rem;font-weight:400;color:var(--muted);line-height:1.5}
+.edu-d{font-family:var(--serif);font-size:1.15rem;font-weight:700;line-height:1.3;margin-bottom:.6rem}
+.edu-i{font-size:.86rem;color:var(--muted);line-height:1.5}
 .edu-note{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;color:var(--o2);margin-top:.75rem}
-
-/* Awards + Certs */
-.ac-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-top:none}
+.ac-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-top:none}
 .ac-col{padding:2.5rem;border-right:1px solid var(--line)}
 .ac-col:last-child{border-right:none}
 .ac-head{font-family:var(--mono);font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--line)}
-.ac-item{padding:.75rem 0;border-bottom:1px solid rgba(245,239,230,.04);font-family:var(--sans);font-size:.86rem;font-weight:400;color:var(--muted);line-height:1.5}
+.ac-item{padding:.8rem 0;border-bottom:1px solid rgba(245,239,230,.05);font-size:.88rem;color:var(--muted);line-height:1.5;transition:padding-left .3s var(--ease),color .3s}
+.ac-item:hover{padding-left:.5rem;color:var(--cream)}
 .ac-item span{display:block;font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;color:var(--muted2);margin-top:.2rem}
-
-/* Languages */
 .lang-grid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-top:none}
 .lang-c{padding:2rem 1.75rem;border-right:1px solid var(--line)}
 .lang-c:last-child{border-right:none}
 .lang-n{font-family:var(--serif);font-size:1.5rem;font-weight:700;margin-bottom:.2rem}
 .lang-lv{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:1.25rem}
 .lang-bar{height:2px;background:var(--line);position:relative;overflow:hidden}
-.lang-f{position:absolute;inset:0 auto 0 0;width:100%;background:var(--o);transform:scaleX(var(--s));transform-origin:left;transition:transform 1.2s cubic-bezier(.16,1,.3,1)}
+.lang-f{position:absolute;inset:0;background:var(--o);transform:scaleX(var(--s));transform-origin:left;transition:transform 1.4s var(--ease)}
 .js .lang-f{transform:scaleX(0)}
 .js .lang-f.go{transform:scaleX(var(--s))}
 
-/* ══════════════════
-   MARTECH
-══════════════════ */
-.mt-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);margin-top:4rem}
-.mt-col{padding:2.5rem;border-right:1px solid var(--line);background:var(--bg2)}
-.mt-col:last-child{border-right:none}
+/* ═══════════ STACK ═══════════ */
+.mt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:4rem}
 .mt-head{font-family:var(--mono);font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--o2);margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--o-line)}
 .mt-tags{display:flex;flex-wrap:wrap;gap:.4rem}
-.mt-tag{
-  font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;
-  padding:.4rem .8rem;border:1px solid var(--line2);color:var(--muted);
-  transition:border-color .2s,color .2s,background .2s;
-}
+.mt-tag{font-family:var(--mono);font-size:.66rem;letter-spacing:.04em;padding:.45rem .8rem;border:1px solid var(--line2);color:var(--muted);transition:border-color .2s,color .2s,background .2s}
 .mt-tag:hover{border-color:var(--o);color:var(--o2);background:var(--o-faint)}
 
-/* ══════════════════
-   CONTACT
-══════════════════ */
-.con-wrap{
-  display:grid;grid-template-columns:1fr 1fr;
-  min-height:85vh;border-top:1px solid var(--line);
-}
+/* ═══════════ CONTACT ═══════════ */
+.con-wrap{display:grid;grid-template-columns:1fr 1fr;min-height:90vh;border-top:1px solid var(--line)}
 .con-photo{position:relative;overflow:hidden;background:#040200}
-.con-photo img{
-  width:100%;height:100%;object-fit:cover;object-position:center 18%;
-  display:block;filter:brightness(.5) contrast(1.1) saturate(1.15);
-}
-.con-photo-ov{
-  position:absolute;inset:0;
-  background:
-    linear-gradient(to right,transparent 55%,var(--bg) 100%),
-    linear-gradient(to bottom,rgba(7,5,3,.3) 0%,transparent 20%),
-    linear-gradient(135deg,rgba(214,88,29,.1) 0%,transparent 50%);
-}
-.con-txt{
-  padding:6rem 4rem;display:flex;flex-direction:column;justify-content:center;
-  background:var(--bg2);border-left:1px solid var(--o-line);
-  position:relative;overflow:hidden;
-}
-.con-txt::before{
-  content:'';position:absolute;
-  width:400px;height:400px;border-radius:50%;
-  background:radial-gradient(circle,rgba(214,88,29,.08) 0%,transparent 70%);
-  bottom:-100px;right:-100px;pointer-events:none;
-}
+.con-photo img{width:100%;height:100%;object-fit:cover;object-position:center 18%;display:block;filter:brightness(.5) contrast(1.1) saturate(1.15)}
+.con-photo-ov{position:absolute;inset:0;background:linear-gradient(to right,transparent 55%,var(--bg2) 100%),linear-gradient(to bottom,rgba(7,5,3,.3) 0%,transparent 20%),linear-gradient(135deg,rgba(214,88,29,.12) 0%,transparent 50%)}
+.con-txt{padding:7rem 4rem;display:flex;flex-direction:column;justify-content:center;background:var(--bg2);border-left:1px solid var(--o-line);position:relative;overflow:hidden}
+.con-txt::before{content:'';position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(214,88,29,.1) 0%,transparent 70%);bottom:-160px;right:-160px;pointer-events:none}
 .con-super{font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--o2);margin-bottom:2rem}
-.con-head{
-  font-family:var(--serif);font-size:clamp(3rem,5.5vw,6rem);
-  font-weight:700;line-height:.9;letter-spacing:-.02em;margin-bottom:3.5rem;
-}
+.con-head{font-family:var(--serif);font-size:clamp(3.2rem,6vw,6.8rem);font-weight:700;line-height:.9;letter-spacing:-.025em;margin-bottom:3rem}
 .con-head em{font-style:italic;font-weight:400;display:block;color:var(--muted)}
+.con-ctas{display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:3rem}
 .con-list{border-top:1px solid var(--o-line)}
-.con-row{
-  display:flex;justify-content:space-between;align-items:center;gap:1rem;
-  padding:1.1rem 0;border-bottom:1px solid var(--line);
-  text-decoration:none;color:inherit;
-  transition:padding-left .2s,background .2s;
-}
-a.con-row:hover{padding-left:8px}
+.con-row{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1.1rem 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit;transition:padding .3s var(--ease)}
+a.con-row:hover{padding-left:10px;padding-right:4px}
 .con-k{font-family:var(--mono);font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2)}
-.con-v{font-family:var(--sans);font-size:.9rem;font-weight:500;color:var(--muted);transition:color .2s;text-align:right;overflow-wrap:anywhere}
+.con-v{font-size:.92rem;font-weight:500;color:var(--muted);transition:color .2s;text-align:right;overflow-wrap:anywhere}
 a.con-row:hover .con-v{color:var(--cream)}
+.con-v .arr{display:inline-block;margin-left:.5rem;color:var(--o2);transition:transform .3s var(--ease)}
+a.con-row:hover .arr{transform:translate(3px,-3px)}
 
-/* FOOTER */
-footer{
-  background:var(--bg3);border-top:1px solid var(--o-line);
-  padding:2rem 3rem;display:flex;justify-content:space-between;align-items:center;
-}
-.ft-l{font-family:var(--serif);font-size:.9rem;font-weight:700;letter-spacing:.04em;color:var(--muted2)}
-.ft-r{font-family:var(--mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2)}
+/* ═══════════ FOOTER + TOAST ═══════════ */
+footer{background:var(--bg3);border-top:1px solid var(--o-line);padding:2rem var(--gut);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1rem}
+.ft-l{font-family:var(--serif);font-size:.95rem;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+.ft-m{font-family:var(--mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);text-align:center}
+.ft-r{justify-self:end;font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-decoration:none;display:inline-flex;gap:.5rem;align-items:center}
+.ft-r:hover{color:var(--o2)}
+.toast{position:fixed;left:50%;bottom:2rem;z-index:2000;transform:translate(-50%,1rem);opacity:0;visibility:hidden;background:var(--cream);color:var(--bg);font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;padding:.85rem 1.3rem;transition:transform .5s var(--ease),opacity .3s,visibility .3s;pointer-events:none;max-width:calc(100vw - 2rem);text-align:center}
+.toast.show{transform:translate(-50%,0);opacity:1;visibility:visible}
 
-/* ══════════════════
-   ANIMATIONS
-══════════════════ */
+/* ═══════════ ANIMATION UTILS ═══════════ */
 @keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-@keyframes su{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes su{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @keyframes revealR{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
-@keyframes pzoom{from{transform:scale(1.05)}to{transform:scale(1)}}
 @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.js .sr{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s ease}
+.js .sr{opacity:0;transform:translateY(32px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
 .js .sr.go{opacity:1;transform:none}
-.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+.d1{transition-delay:.08s!important}.d2{transition-delay:.16s!important}.d3{transition-delay:.24s!important}
 
+/* ═══════════ RESPONSIVE ═══════════ */
+@media(max-width:1180px){
+  .sidx{display:none}
+  .nav-links{gap:1.5rem}
+}
+@media(max-width:1020px){
+  .nav-cta .btn.ghost{display:none}
+}
 @media(max-width:900px){
-  nav{padding:0 1.5rem}
-  .nav-btn{display:none}
+  :root{--gut:1.5rem}
+  .nav-cta{display:none}
   .js .nav-toggle{display:flex}
-  .nav-links{
-    display:none;position:fixed;top:64px;left:0;right:0;
-    flex-direction:column;gap:0;padding:.5rem 1.5rem 1.5rem;
-    background:var(--bg);border-bottom:1px solid var(--o-line);
-  }
+  .nav-links{display:none;position:fixed;top:64px;left:0;right:0;flex-direction:column;gap:0;padding:.5rem 1.5rem 1.5rem;background:var(--bg);border-bottom:1px solid var(--o-line)}
   nav.open{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}
   nav.open .nav-links{display:flex}
   .nav-links a{display:block;padding:1rem 0;border-bottom:1px solid var(--line);font-size:.74rem}
+  .nav-links a::after{display:none}
+  .nav-links .m-only{display:block}
   html:not(.js) .nav-links{display:none}
-  .hero{grid-template-columns:minmax(0,1fr);height:auto;min-height:0}
-  .hero-r{height:75vw}
-  .hero-l{padding:7.5rem 1.5rem 4rem;border-right:none}
-  .hero-index{left:1.5rem}
+  .hero{grid-template-columns:minmax(0,1fr);min-height:0}
+  .hero-r{height:85vw;max-height:620px}
+  .hero-l{padding:9.5rem 1.5rem 3.5rem;border-right:none}
   .h-name{font-size:clamp(2.75rem,15.5vw,6rem)}
   .h-stats{grid-template-columns:1fr 1fr;width:100%}
   .h-stat:nth-child(2n){border-right:none}
   .h-stat:nth-child(-n+2){border-bottom:1px solid var(--o-line)}
-  .hero-scroll{display:none}
-  .sec{padding:4.5rem 1.5rem}
-  .sec-eyebrow{margin-bottom:3rem}
-  .about-layout{grid-template-columns:1fr;gap:3rem;margin-top:3rem}
-  .nums{grid-template-columns:1fr 1fr;padding:0}
-  .n-cell{border-right:none;border-bottom:1px solid var(--line);padding:2rem 1.5rem}
-  .n-cell:nth-child(odd):not(:last-child){border-right:1px solid var(--line)}
-  .n-cell:last-child{grid-column:1/-1;border-bottom:none}
-  .exp-top{grid-template-columns:1fr 32px;padding:1.25rem .5rem 1.25rem 1rem}
-  .e-role,.e-loc{display:none}
-  .e-arr{margin-right:0}
-  .exp-body-in{grid-template-columns:1fr}
-  .hl-card{width:min(300px,82vw);padding:2.5rem 1.75rem}
-  .clients-sec{padding:4rem 1.5rem}
-  .cl-item{font-size:.88rem;padding:.8rem 1.1rem}
+  .sec{padding:5rem 1.5rem}
+  .sec-eyebrow{margin-bottom:2.5rem}
+  .manifesto{margin-top:3rem}
+  .about-layout{grid-template-columns:1fr;gap:3rem;margin-top:3.5rem}
+  .scale{padding:5rem 1.5rem}
+  .scale-head{flex-direction:column;align-items:flex-start}
+  .scale-note{text-align:left}
+  .scale-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sc{padding:2rem 1.25rem;border-right:1px solid var(--line)!important;border-bottom:1px solid var(--line)!important}
+  .sc:nth-child(2n){border-right:none!important}
+  .sc:nth-last-child(-n+2){border-bottom:none!important}
+  .tl{grid-template-columns:1fr;gap:0}
+  .tl-side{display:none}
+  .tl-item{padding:2rem 0 2rem 1.25rem}
+  .tl-b{grid-template-columns:1fr}
+  .bento{grid-template-columns:1fr}
+  .card.xl,.card.w2,.card.w4{grid-column:auto;grid-row:auto}
+  .bento .card{min-height:0}
+  .card{padding:2.25rem 1.5rem}
+  .card.w4{flex-direction:column;align-items:flex-start;gap:.75rem}
+  .card.w4 .c-b{margin-left:0}
+  .c-big{margin-top:.5rem}
+  .clients{padding:4.5rem 0}
+  .cl-head{flex-direction:column}
   .edu-cards{grid-template-columns:1fr}
-  .edu-c{border-right:none;border-bottom:1px solid var(--line)}
-  .edu-c:last-child{border-bottom:none}
   .ac-grid{grid-template-columns:1fr}
   .ac-col{border-right:none;border-bottom:1px solid var(--line);padding:2rem 1.5rem}
+  .ac-col:last-child{border-bottom:none}
   .lang-grid{grid-template-columns:1fr 1fr}
   .lang-c:nth-child(even){border-right:none}
   .lang-c:nth-child(-n+2){border-bottom:1px solid var(--line)}
   .mt-grid{grid-template-columns:1fr}
-  .mt-col{border-right:none;border-bottom:1px solid var(--line)}
   .con-wrap{grid-template-columns:1fr;min-height:0}
-  .con-photo{height:60vw}
-  .con-txt{padding:3rem 1.5rem;border-left:none}
+  .con-photo{height:70vw;max-height:520px}
+  .con-txt{padding:3.5rem 1.5rem;border-left:none}
   .con-row{flex-wrap:wrap}
-  footer{flex-direction:column;gap:.5rem;text-align:center;padding:1.5rem}
+  footer{grid-template-columns:1fr;text-align:center;padding:1.75rem 1.5rem}
+  .ft-r{justify-self:center}
+}
+@media(max-width:560px){
+  .scale-grid{grid-template-columns:minmax(0,1fr)}
+  .sc{border-right:none!important;border-bottom:1px solid var(--line)!important}
+  .sc:last-child{border-bottom:none!important}
 }
 
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important;transition-delay:0s!important}
-  .ticker-inner{animation:none!important}
+  .mq-track{animation:none!important;flex-wrap:wrap;flex-shrink:1}
+  .mq{-webkit-mask:none;mask:none;padding:0 var(--gut)}
+  .mq-track[aria-hidden="true"]{display:none}
+  .dot{animation:none!important}
 }
 
 @media print{
   :root{--bg:#fff;--bg2:#fff;--bg3:#fff;--cream:#111;--muted:#333;--muted2:#555;--line:#ddd;--line2:#ccc;--o-line:#e2b9a3;--o-line2:#d6581d;--o2:#b4461a}
   @page{margin:14mm}
   body{background:#fff;color:#111}
-  body::before,#cur,#cur2,#sprog,nav,.skip,.ticker,.hero-r,.hero-ghost,.hero-index,.hero-scroll,.sec-bg-num,.hl-ctrl,.con-photo,.edu-ghost,.hl-n{display:none!important}
+  body::before,#cur,#cur2,#sprog,nav,.sidx,.skip,.ticker,.hero-r,.hero-ghost,.hero-index,.live,.sec-bg-num,.con-photo,.edu-ghost,.c-n,.tl-side,.mq,.con-ctas,.toast,.ft-r{display:none!important}
   *,*::before,*::after{animation:none!important;transition:none!important}
-  .h-kicker,.h-name,.h-rule,.h-sub,.h-stats,.sr{opacity:1!important;transform:none!important}
-  .hero{display:block;height:auto;min-height:0}
-  .hero-l{padding:0 0 1.5rem;border:none}
+  .h-kicker,.h-name,.ch,.h-rule,.h-sub,.h-stats,.sr,.manifesto .w{opacity:1!important;transform:none!important}
+  .rot>span:not(.on){display:none}
+  .hero{display:block;min-height:0}
+  .hero-l{padding:0 0 1.5rem;border:none;background:none}
   .h-name{font-size:3rem}
-  .sec,.clients-sec{padding:2rem 0}
+  .sec,.scale,.clients{padding:2rem 0}
   .sec-eyebrow{margin-bottom:1rem}
   .disp{font-size:1.9rem}
+  .manifesto{font-size:1.3rem;margin-top:1rem}
   .about-layout{margin-top:1.5rem;gap:2rem}
-  .exp-body,.js .exp-body{max-height:none!important;visibility:visible!important}
-  .exp-top{padding:.9rem 0 .5rem}
-  .e-arr{display:none}
-  .exp-row,.hl-card,.edu-c,.ac-item,.n-cell{break-inside:avoid}
-  .exp-body-in{background:none;border-top:none;padding:0 0 1rem}
-  .hl-outer{overflow:visible;border:none}
-  .hl-track{flex-wrap:wrap;width:auto}
-  .hl-card{width:50%;padding:1.25rem;border:1px solid var(--line)}
+  .tl{display:block}
+  .tl-item,.card,.ac-item,.sc{break-inside:avoid}
+  .tl-item{padding:1rem 0}
+  .bento,.edu-cards,.mt-grid{display:block;background:none;border:none}
+  .card{border:1px solid var(--line);margin-bottom:.5rem;min-height:0!important;padding:1rem}
+  .card::before,.card::after{display:none}
+  .c-big{font-size:2rem;margin:0 0 .5rem}
+  .cl-list-print{position:static!important;width:auto!important;height:auto!important;clip:auto!important;margin:0!important;white-space:normal!important;display:flex;flex-wrap:wrap;gap:.25rem 1rem;font-size:.85rem}
+  .cl-head{padding:0;margin-bottom:1rem}
   .js .lang-f{transform:scaleX(var(--s))}
   .con-wrap{display:block;min-height:0}
   .con-txt{padding:1.5rem 0;border:none}
   .con-txt::before{display:none}
   .con-head{font-size:2rem;margin-bottom:1rem}
-  footer{padding:1rem 0;border-top:1px solid var(--line)}
+  footer{display:block;padding:1rem 0;border-top:1px solid var(--line)}
 }
-
 </style>
 </head>
 <body>
@@ -700,37 +492,60 @@ footer{
 <!-- NAV -->
 <nav id="nav" aria-label="Primary">
   <a class="nav-mark" href="#top">Bireshwar Chakravarty</a>
-  <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span class="nav-toggle-i" aria-hidden="true"></span><span class="nav-toggle-t">Menu</span></button>
   <ul class="nav-links" id="nav-menu">
     <li><a href="#about">Profile</a></li>
     <li><a href="#exp">Experience</a></li>
     <li><a href="#hl">Highlights</a></li>
     <li><a href="#edu">Education</a></li>
     <li><a href="#con">Contact</a></li>
+    <li class="m-only"><a href="assets/Bireshwar_Chakravarty_Resume_2026.pdf" download>Download résumé (PDF)</a></li>
   </ul>
-  <a href="mailto:bireshwar.chakravarty@gmail.com" class="nav-btn">Connect</a>
+  <div class="nav-cta">
+    <a class="btn ghost" href="assets/Bireshwar_Chakravarty_Resume_2026.pdf" download>Résumé <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M6 1v8M2.5 5.5 6 9l3.5-3.5M1 11h10"/></svg></a>
+    <a class="btn" href="mailto:bireshwar.chakravarty@gmail.com">Connect</a>
+  </div>
+  <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu"><span class="nav-toggle-i" aria-hidden="true"></span><span class="nav-toggle-t">Menu</span></button>
 </nav>
+
+<!-- SIDE INDEX -->
+<div class="sidx" id="sidx" aria-hidden="true">
+  <a href="#top" data-s="top" tabindex="-1">Intro</a>
+  <a href="#about" data-s="about" tabindex="-1">Profile</a>
+  <a href="#scale" data-s="scale" tabindex="-1">Scale</a>
+  <a href="#exp" data-s="exp" tabindex="-1">Experience</a>
+  <a href="#hl" data-s="hl" tabindex="-1">Highlights</a>
+  <a href="#edu" data-s="edu" tabindex="-1">Education</a>
+  <a href="#stack" data-s="stack" tabindex="-1">Stack</a>
+  <a href="#con" data-s="con" tabindex="-1">Contact</a>
+</div>
 
 <main id="main" tabindex="-1">
 
 <!-- HERO -->
 <section class="hero" id="top">
-  <div class="hero-l">
+  <div class="hero-l" id="heroL">
     <div class="hero-ghost" aria-hidden="true">B</div>
-    <div class="hero-index"><span>Director — Digital Strategy — <span data-year>2026</span></span></div>
-    <p class="h-kicker">Government &amp; Enterprise Communications Leader</p>
-    <h1 class="h-title"><span class="h-name-wrap"><span class="h-name">Bireshwar</span></span> <span class="h-name-wrap"><span class="h-name ital">Chakravarty</span></span></h1>
+    <div class="hero-index"><span>Director — Digital Strategy</span><span class="avail"><span class="dot" aria-hidden="true"></span>New Delhi · <span data-time>IST</span></span></div>
+    <p class="h-kicker">
+      <span class="sr-only">Government &amp; Enterprise Communications Leader · AI-Led Marketing Architect</span>
+      <span class="rot" id="rot" aria-hidden="true"><span class="on">Government &amp; Enterprise Communications Leader</span><span>AI-Led Marketing Architect</span><span>Integrated Campaign Architect</span><span>P&amp;L Owner · Team Builder</span></span>
+    </p>
+    <h1 class="h-title" id="hName"><span class="h-name-wrap"><span class="h-name">Bireshwar</span></span> <span class="h-name-wrap"><span class="h-name ital">Chakravarty</span></span></h1>
     <div class="h-rule" aria-hidden="true"></div>
     <p class="h-sub">Sixteen years at the intersection of government, enterprise, and creative innovation. Built to lead at national scale.</p>
     <div class="h-stats">
       <div class="h-stat"><div class="h-sn" data-count="16" data-sfx="+">16+</div><div class="h-sl">Years</div></div>
-      <div class="h-stat"><div class="h-sn">10.8B</div><div class="h-sl">Impressions</div></div>
-      <div class="h-stat"><div class="h-sn">₹10Cr+</div><div class="h-sl">Annual portfolio</div></div>
+      <div class="h-stat"><div class="h-sn" data-count="10.8" data-dec="1" data-sfx="B">10.8B</div><div class="h-sl">Impressions / yr</div></div>
+      <div class="h-stat"><div class="h-sn" data-count="10" data-pre="₹" data-sfx="Cr+">₹10Cr+</div><div class="h-sl">Annual portfolio</div></div>
       <div class="h-stat"><div class="h-sn" data-count="80">80</div><div class="h-sl">Team</div></div>
     </div>
-    <div class="hero-scroll" aria-hidden="true"><div class="hero-scroll-line"></div>scroll to explore</div>
+    <div class="live" aria-hidden="true">
+      <span class="live-tag"><span class="dot"></span>Live</span>
+      <span><span class="live-n" id="liveN">0</span> impressions since you arrived</span>
+      <span>· est. at 10.8B / year</span>
+    </div>
   </div>
-  <div class="hero-r">
+  <div class="hero-r" id="heroR">
     <picture>
       <source type="image/webp" srcset="assets/portrait-640.webp 640w, assets/portrait-1024.webp 1024w" sizes="(max-width: 900px) 100vw, 48vw">
       <img src="assets/portrait-1024.jpg" srcset="assets/portrait-640.jpg 640w, assets/portrait-1024.jpg 1024w" sizes="(max-width: 900px) 100vw, 48vw" width="1024" height="1536" alt="Portrait of Bireshwar Chakravarty" fetchpriority="high" decoding="async">
@@ -742,7 +557,7 @@ footer{
 
 <!-- TICKER -->
 <div class="ticker" aria-hidden="true">
-  <div class="ticker-inner">
+  <div class="ticker-inner" id="ticker">
     <div class="t-item">Digital Strategy</div><div class="t-item">Government Communications</div>
     <div class="t-item">AI-Led Marketing</div><div class="t-item">P&amp;L Leadership</div>
     <div class="t-item">Avian We.</div><div class="t-item">Weber Shandwick</div>
@@ -768,14 +583,12 @@ footer{
     <span class="s-label">Profile</span>
   </div>
   <h2 class="disp sr">Sixteen years.<br>Built to <em>lead at scale.</em></h2>
+  <p class="manifesto" id="manifesto">Turning policy into stories, mandates into movements, and national ambitions into <em>10.8 billion moments of attention</em> a year — with a filmmaker's eye for what makes people stop, look, and care.</p>
   <div class="about-layout">
-    <div class="sr d1">
-      <p class="about-quote">"Strategic thinker with a creative edge — operating at the intersection of government, enterprise, and AI-driven innovation."</p>
-      <div class="about-body">
-        <p>Digital and integrated communications leader driving large-scale government and enterprise mandates across the public sector, B2B, and consumer brands. At <strong>Avian We.</strong>, steering digital strategy for national ministries — a monthly mandate of <strong>~INR 85 Lakhs</strong>, an aggregate annual portfolio exceeding <strong>INR 10 Crores</strong>, and an 80-member cross-functional team delivering a national ecosystem of <strong>10.8 billion annual impressions</strong> across MIB, MEA, MoPSW and NHAI.</p>
-        <p>Former P&amp;L owner of an agency vertical at <strong>popkorn</strong> generating INR 95 Lakhs/month — delivering <strong>19% revenue growth</strong> and launching a dedicated AI Marketing practice that improved productivity by <strong>up to 28%</strong>. Founded <strong>MRKTNG Labs India</strong> from the ground up. Fluent in campaign conceptualisation, production, and client servicing — with a rare foundation in film, photography, and visual storytelling.</p>
-        <p>Award-winning filmmaker: <strong>Best Short Film, International Short Film Festival, Phoenix AZ</strong>, and an Official Selection at Goa Film Festival 2015. Commissioned photographer for <strong>Bharat Dalmia Group</strong>, featured by the <strong>National Museum</strong>. Collaborated with <strong>Harley-Davidson, Ferrari, and Lamborghini</strong> on branded content.</p>
-      </div>
+    <div class="about-body sr">
+      <p>Digital and integrated communications leader driving large-scale government and enterprise mandates across the public sector, B2B, and consumer brands. At <strong>Avian We.</strong>, steering digital strategy for national ministries — a monthly mandate of <strong>~INR 85 Lakhs</strong>, an aggregate annual portfolio exceeding <strong>INR 10 Crores</strong>, and an 80-member cross-functional team delivering a national ecosystem of <strong>10.8 billion annual impressions</strong> across MIB, MEA, MoPSW and NHAI.</p>
+      <p>Former P&amp;L owner of an agency vertical at <strong>popkorn</strong> generating INR 95 Lakhs/month — delivering <strong>19% revenue growth</strong> and launching a dedicated AI Marketing practice that improved productivity by <strong>up to 28%</strong>. Founded <strong>MRKTNG Labs India</strong> from the ground up. Fluent in campaign conceptualisation, production, and client servicing — with a rare foundation in film, photography, and visual storytelling.</p>
+      <p>Award-winning filmmaker: <strong>Best Short Film, International Short Film Festival, Phoenix AZ</strong>, and an Official Selection at Goa Film Festival 2015. Commissioned photographer for <strong>Bharat Dalmia Group</strong>, featured by the <strong>National Museum</strong>. Collaborated with <strong>Harley-Davidson, Ferrari, and Lamborghini</strong> on branded content.</p>
     </div>
     <div class="sr d2">
       <h3 class="trait-head">Personality</h3>
@@ -798,14 +611,21 @@ footer{
   </div>
 </section>
 
-<!-- NUMBERS -->
-<div class="nums sr">
-  <div class="n-cell"><div class="n-val" data-count="16" data-sfx="+">16+</div><div class="n-lab">Years of<br>experience</div></div>
-  <div class="n-cell"><div class="n-val">10.8B</div><div class="n-lab">Annual impressions<br>delivered</div></div>
-  <div class="n-cell"><div class="n-val" data-count="80">80</div><div class="n-lab">Cross-functional<br>team led</div></div>
-  <div class="n-cell"><div class="n-val" data-count="19" data-sfx="%">19%</div><div class="n-lab">Revenue growth<br>at popkorn</div></div>
-  <div class="n-cell"><div class="n-val" data-count="28" data-sfx="%">28%</div><div class="n-lab">AI productivity<br>gain (up to)</div></div>
-</div>
+<!-- SCALE -->
+<section class="scale" id="scale" aria-labelledby="scale-h">
+  <div class="scale-head sr">
+    <h2 class="disp" id="scale-h">Scale, <em>in context.</em></h2>
+    <p class="scale-note">What the numbers mean in the real world.</p>
+  </div>
+  <div class="scale-grid sr">
+    <div class="sc"><div class="sc-v" data-count="10.8" data-dec="1" data-sfx="B">10.8B</div><div class="sc-l">Annual impressions</div><p class="sc-c">≈ 7.5 for every person in India, every year — across MIB, MEA, MoPSW and NHAI.</p></div>
+    <div class="sc"><div class="sc-v" data-count="16" data-sfx="+">16+</div><div class="sc-l">Years</div><p class="sc-c">Across global agencies, national government mandates and two founder-led ventures.</p></div>
+    <div class="sc"><div class="sc-v" data-count="80">80</div><div class="sc-l">People led</div><p class="sc-c">A cross-functional team with 65 direct reports — content, design, video, analytics.</p></div>
+    <div class="sc"><div class="sc-v" data-count="10" data-pre="₹" data-sfx="Cr+">₹10Cr+</div><div class="sc-l">Annual portfolio</div><p class="sc-c">Aggregate value of national ministry mandates — ~₹85 Lakhs every month.</p></div>
+    <div class="sc"><div class="sc-v" data-count="2" data-sfx="M+">2M+</div><div class="sc-l">Net new followers</div><p class="sc-c">Combined community growth across X, Facebook and Instagram.</p></div>
+    <div class="sc"><div class="sc-v" data-count="19" data-sfx="%">19%</div><div class="sc-l">Revenue growth</div><p class="sc-c">Delivered with full P&amp;L ownership of a ~₹95 Lakh/month agency vertical.</p></div>
+  </div>
+</section>
 
 <!-- EXPERIENCE -->
 <section class="sec" id="exp">
@@ -816,17 +636,23 @@ footer{
   </div>
   <h2 class="disp sr">A career built<br>across <em>agencies, government</em><br>&amp; <em>independent ventures.</em></h2>
   <p class="exp-intro sr">Sixteen years. Three sectors. One consistent outcome: raising the ceiling at every stop.</p>
-  <div class="exp-list sr">
 
-    <div class="exp-row open">
-      <h3><button class="exp-top" type="button" aria-expanded="true" aria-controls="xp1">
-        <span class="e-co">Avian We.<span class="e-per">Sep 2025 – Present</span></span>
-        <span class="e-role">Director — Digital (Government Practice)</span>
-        <span class="e-loc">New Delhi</span>
-        <span class="e-arr" aria-hidden="true">›</span>
-      </button></h3>
-      <div class="exp-body" id="xp1">
-        <ul class="exp-body-in">
+  <div class="tl">
+    <div class="tl-side" aria-hidden="true">
+      <div class="tl-sticky">
+        <div class="tl-year"><span id="tlYear">2025</span></div>
+        <div class="tl-co" id="tlCo">Avian We.</div>
+        <div class="tl-role" id="tlRole">Director — Digital (Government Practice)</div>
+        <div class="tl-bar"><span id="tlBar"></span></div>
+        <div class="tl-count" id="tlCount">01 / 09</div>
+      </div>
+    </div>
+    <ol class="tl-list" id="tlList">
+
+      <li class="tl-item sr" data-y="2025">
+        <div class="tl-meta"><span class="n">01</span><span>Sep 2025 – Present</span><span>New Delhi</span></div>
+        <h3 class="tl-h"><span class="tl-company">Avian We.</span><span class="tl-rl">Director — Digital (Government Practice)</span></h3>
+        <ul class="tl-b">
           <li class="eb">Government digital mandates across <strong>MIB, MEA, MoPSW &amp; NHAI</strong> — ~INR 85 Lakhs/month</li>
           <li class="eb">Lead an <strong>80-member cross-functional team</strong> (65 direct reports): content, design, video, analytics</li>
           <li class="eb">National digital communication ecosystem generating <strong>10.8 billion annual impressions</strong></li>
@@ -834,190 +660,135 @@ footer{
           <li class="eb">Strategic bridge between government stakeholders and cross-functional execution teams</li>
           <li class="eb">Translate policy and institutional objectives into structured, outcome-driven digital communication frameworks</li>
         </ul>
-      </div>
-    </div>
+      </li>
 
-    <div class="exp-row">
-      <h3><button class="exp-top" type="button" aria-expanded="false" aria-controls="xp2">
-        <span class="e-co">popkorn<span class="e-per">Jan – Sep 2025</span></span>
-        <span class="e-role">Director — Client Servicing</span>
-        <span class="e-loc">New Delhi</span>
-        <span class="e-arr" aria-hidden="true">›</span>
-      </button></h3>
-      <div class="exp-body" id="xp2">
-        <ul class="exp-body-in">
+      <li class="tl-item sr" data-y="2025">
+        <div class="tl-meta"><span class="n">02</span><span>Jan – Sep 2025</span><span>New Delhi</span></div>
+        <h3 class="tl-h"><span class="tl-company">popkorn</span><span class="tl-rl">Director — Client Servicing</span></h3>
+        <ul class="tl-b">
           <li class="eb"><strong>Full P&amp;L ownership</strong> of a vertical generating ~INR 95 Lakhs/month; delivered <strong>19% revenue growth</strong></li>
           <li class="eb">25-member team across strategy, creative and delivery — <strong>13 brand mandates</strong> simultaneously in real estate, wellness, fashion, hospitality</li>
           <li class="eb">Launched the <strong>AI Marketing Vertical</strong> — up to 28% productivity improvement across content, research and delivery</li>
           <li class="eb">Negotiated vendor contracts worth ~INR 40 Lakhs, optimising cost efficiency and output quality</li>
           <li class="eb">New business development, creative planning, and client success leadership</li>
         </ul>
-      </div>
-    </div>
+      </li>
 
-    <div class="exp-row">
-      <h3><button class="exp-top" type="button" aria-expanded="false" aria-controls="xp3">
-        <span class="e-co">MRKTNG Labs India<span class="e-per">Sep 2024 – Jan 2025</span></span>
-        <span class="e-role">Founder &amp; Creative Head</span>
-        <span class="e-loc">Independent</span>
-        <span class="e-arr" aria-hidden="true">›</span>
-      </button></h3>
-      <div class="exp-body" id="xp3">
-        <ul class="exp-body-in">
+      <li class="tl-item sr" data-y="2024">
+        <div class="tl-meta"><span class="n">03</span><span>Sep 2024 – Jan 2025</span><span>Independent</span></div>
+        <h3 class="tl-h"><span class="tl-company">MRKTNG Labs India</span><span class="tl-rl">Founder &amp; Creative Head</span></h3>
+        <ul class="tl-b">
           <li class="eb">Boutique digital strategy consultancy generating <strong>~INR 15 Lakhs/month</strong> from 4 active real estate clients</li>
           <li class="eb">Owned end-to-end strategy, pricing, team building (5 members) and client delivery from inception</li>
           <li class="eb">Brand positioning, creative strategy, paid media, performance marketing</li>
           <li class="eb">Process frameworks for agile campaign deployment and sustained client retention</li>
         </ul>
-      </div>
-    </div>
+      </li>
 
-    <div class="exp-row">
-      <h3><button class="exp-top" type="button" aria-expanded="false" aria-controls="xp4">
-        <span class="e-co">Annalect India (Omnicom)<span class="e-per">Dec 2023 – Jul 2024</span></span>
-        <span class="e-role">Senior Project Manager — Creative Services</span>
-        <span class="e-loc">Gurugram</span>
-        <span class="e-arr" aria-hidden="true">›</span>
-      </button></h3>
-      <div class="exp-body" id="xp4">
-        <ul class="exp-body-in">
+      <li class="tl-item sr" data-y="2023">
+        <div class="tl-meta"><span class="n">04</span><span>Dec 2023 – Jul 2024</span><span>Gurugram</span></div>
+        <h3 class="tl-h"><span class="tl-company">Annalect India (Omnicom)</span><span class="tl-rl">Senior Project Manager — Creative Services</span></h3>
+        <ul class="tl-b">
           <li class="eb">Digital creative delivery across <strong>4 international markets</strong></li>
           <li class="eb">Oversaw creative direction; maintained design team quality and delivery standards</li>
           <li class="eb">Coordinated internal and external stakeholders; ensured on-time, on-budget delivery</li>
         </ul>
-      </div>
-    </div>
+      </li>
 
-    <div class="exp-row">
-      <h3><button class="exp-top" type="button" aria-expanded="false" aria-controls="xp5">
-        <span class="e-co">Adfactors PR<span class="e-per">Feb 2022 – Nov 2023</span></span>
-        <span class="e-role">Senior Account Manager — Digital</span>
-        <span class="e-loc">New Delhi</span>
-        <span class="e-arr" aria-hidden="true">›</span>
-      </button></h3>
-      <div class="exp-body" id="xp5">
-        <ul class="exp-body-in">
+      <li class="tl-item sr" data-y="2022">
+        <div class="tl-meta"><span class="n">05</span><span>Feb 2022 – Nov 2023</span><span>New Delhi</span></div>
+        <h3 class="tl-h"><span class="tl-company">Adfactors PR</span><span class="tl-rl">Senior Account Manager — Digital</span></h3>
+        <ul class="tl-b">
           <li class="eb">Retained <strong>90% of managed accounts</strong>; grew the Pacific Malls mandate from 1 to 3 malls as expanded project scope</li>
           <li class="eb">Clients: <strong>Padma Bhushan Sudha Murty, BharatPe, NTPC, Canon, Schaeffler, Obeetee Carpets</strong></li>
           <li class="eb">Integrated digital campaigns across FMCG, B2B, and government sectors</li>
           <li class="eb">Consultation services for ICRIER, ASDC, Kuantum Papers, KSFC–Satyarthi Movement</li>
         </ul>
-      </div>
-    </div>
+      </li>
 
-    <div class="exp-row">
-      <h3><button class="exp-top" type="button" aria-expanded="false" aria-controls="xp6">
-        <span class="e-co">Weber Shandwick<span class="e-per">Sep 2019 – Jan 2022</span></span>
-        <span class="e-role">Digital Project Manager</span>
-        <span class="e-loc">Gurugram</span>
-        <span class="e-arr" aria-hidden="true">›</span>
-      </button></h3>
-      <div class="exp-body" id="xp6">
-        <ul class="exp-body-in">
+      <li class="tl-item sr" data-y="2019">
+        <div class="tl-meta"><span class="n">06</span><span>Sep 2019 – Jan 2022</span><span>Gurugram</span></div>
+        <h3 class="tl-h"><span class="tl-company">Weber Shandwick</span><span class="tl-rl">Digital Project Manager</span></h3>
+        <ul class="tl-b">
           <li class="eb">Mandates: <strong>Skill India, NSDC, Department of Biotechnology (GoI), Facebook, BMC, TESCO</strong></li>
           <li class="eb">End-to-end <strong>IndiaSkills &amp; WorldSkills India</strong> for the Ministry of Skill Development &amp; Entrepreneurship — strategy, content and campaigns across national and international editions</li>
           <li class="eb">Managed paid media budgets of <strong>~INR 10 Lakhs/month</strong> across government and enterprise accounts</li>
           <li class="eb">Mentored cross-functional teams; built client-centric strategies integrating emerging social platforms</li>
         </ul>
-      </div>
-    </div>
+      </li>
 
-    <div class="exp-row">
-      <h3><button class="exp-top" type="button" aria-expanded="false" aria-controls="xp7">
-        <span class="e-co">Adfactors PR<span class="e-per">Jan 2016 – Sep 2019</span></span>
-        <span class="e-role">Senior Account Executive — Social Media</span>
-        <span class="e-loc">New Delhi</span>
-        <span class="e-arr" aria-hidden="true">›</span>
-      </button></h3>
-      <div class="exp-body" id="xp7">
-        <ul class="exp-body-in">
+      <li class="tl-item sr" data-y="2016">
+        <div class="tl-meta"><span class="n">07</span><span>Jan 2016 – Sep 2019</span><span>New Delhi</span></div>
+        <h3 class="tl-h"><span class="tl-company">Adfactors PR</span><span class="tl-rl">Senior Account Executive — Social Media</span></h3>
+        <ul class="tl-b">
           <li class="eb">Social media strategy for <strong>Honda Motorcycles, Kailash Satyarthi Children's Foundation, UN Global Compact, India Brand Equity Foundation, Pirelli Tyres, Coffee Board of India</strong></li>
           <li class="eb">India Mobile Congress <strong>2017 &amp; 2018</strong> (Asia's largest technology forum), Auto Expo 2018, Laureates &amp; Leaders for Children Summit 2016</li>
           <li class="eb">Real-time social coverage, live content production, stakeholder amplification and post-event reporting</li>
           <li class="eb">Won the <strong>Best Celebrity PR Award</strong> — Individual Image Perception</li>
         </ul>
-      </div>
-    </div>
+      </li>
 
-    <div class="exp-row">
-      <h3><button class="exp-top" type="button" aria-expanded="false" aria-controls="xp8">
-        <span class="e-co">Earlier Career<span class="e-per">Jan 2014 – Jan 2016</span></span>
-        <span class="e-role">Creative &amp; Content Roles</span>
-        <span class="e-loc"></span>
-        <span class="e-arr" aria-hidden="true">›</span>
-      </button></h3>
-      <div class="exp-body" id="xp8">
-        <ul class="exp-body-in">
+      <li class="tl-item sr" data-y="2014">
+        <div class="tl-meta"><span class="n">08</span><span>Jan 2014 – Jan 2016</span></div>
+        <h3 class="tl-h"><span class="tl-company">Earlier Career</span><span class="tl-rl">Creative &amp; Content Roles</span></h3>
+        <ul class="tl-b">
           <li class="eb"><strong>Creative Manager</strong> — Evolve Inc (Oct 2014 – Jan 2016)</li>
           <li class="eb"><strong>Senior Content Producer</strong> — Two55am Studiio (Jan – Sep 2014)</li>
         </ul>
-      </div>
-    </div>
+      </li>
 
-    <div class="exp-row">
-      <h3><button class="exp-top" type="button" aria-expanded="false" aria-controls="xp9">
-        <span class="e-co">Unkempt Illusions Photography<span class="e-per">2010 – 2020 · concurrent</span></span>
-        <span class="e-role">Founder &amp; Director — Photography</span>
-        <span class="e-loc">New Delhi</span>
-        <span class="e-arr" aria-hidden="true">›</span>
-      </button></h3>
-      <div class="exp-body" id="xp9">
-        <ul class="exp-body-in">
+      <li class="tl-item sr" data-y="2010">
+        <div class="tl-meta"><span class="n">09</span><span>2010 – 2020 · concurrent</span><span>New Delhi</span></div>
+        <h3 class="tl-h"><span class="tl-company">Unkempt Illusions Photography</span><span class="tl-rl">Founder &amp; Director — Photography</span></h3>
+        <ul class="tl-b">
           <li class="eb">Premium product photography — luxury automotive, jewellery, fashion</li>
           <li class="eb">Commissioned by <strong>Bharat Dalmia Group</strong>; featured by the <strong>National Museum</strong></li>
           <li class="eb">Collaborated with <strong>Harley-Davidson, Ferrari, Lamborghini</strong> on branded content</li>
           <li class="eb">Built high-end client roster; drove significant growth in the luxury sector</li>
         </ul>
-      </div>
-    </div>
+      </li>
 
+    </ol>
   </div>
 </section>
 
 <!-- CAREER HIGHLIGHTS -->
-<section class="sec" id="hl" style="padding-bottom:0">
+<section class="sec" id="hl">
   <div class="sec-bg-num" aria-hidden="true">03</div>
   <div class="sec-eyebrow sr">
     <span class="s-num">03</span><div class="s-line"></div>
     <span class="s-label">Career Highlights</span>
   </div>
   <h2 class="disp sr">The moments<br>that <em>define the work.</em></h2>
-  <div class="hl-ctrl sr">
-    <span>Drag, scroll or use arrows</span>
-    <button class="hl-btn" id="hlPrev" type="button" aria-label="Previous highlights" aria-controls="hlO">←</button>
-    <button class="hl-btn" id="hlNext" type="button" aria-label="Next highlights" aria-controls="hlO">→</button>
-  </div>
-  <div class="hl-outer sr" id="hlO" tabindex="0" role="region" aria-label="Career highlights (scrolls horizontally)">
-    <ul class="hl-track">
-      <li class="hl-card"><div class="hl-n" aria-hidden="true">01</div><div class="hl-cat">Government · Scale</div><h3 class="hl-t">National Digital Ecosystem</h3><p class="hl-b">Steering digital strategy for MIB, MEA, MoPSW &amp; NHAI simultaneously — 10.8B impressions, 2M+ new followers, ₹85L/month mandate at Avian We.</p></li>
-      <li class="hl-card"><div class="hl-n" aria-hidden="true">02</div><div class="hl-cat">Revenue · Growth</div><h3 class="hl-t">19% Revenue Growth at popkorn</h3><p class="hl-b">Full P&amp;L ownership of a ~₹95L/month agency vertical. Ran 13 brand mandates and launched an AI Marketing practice — up to 28% productivity improvement.</p></li>
-      <li class="hl-card"><div class="hl-n" aria-hidden="true">03</div><div class="hl-cat">Entrepreneurship</div><h3 class="hl-t">Founded MRKTNG Labs India</h3><p class="hl-b">Built a boutique digital consultancy from inception — ₹15L/month, 4 real estate clients, team of 5, complete end-to-end ownership.</p></li>
-      <li class="hl-card"><div class="hl-n" aria-hidden="true">04</div><div class="hl-cat">Government · Flagship</div><h3 class="hl-t">IndiaSkills &amp; WorldSkills India</h3><p class="hl-b">End-to-end digital strategy for Ministry of Skill Development's flagship national and international programmes at Weber Shandwick.</p></li>
-      <li class="hl-card"><div class="hl-n" aria-hidden="true">05</div><div class="hl-cat">Film · Awards</div><h3 class="hl-t">Best Short Film · Phoenix, Arizona</h3><p class="hl-b">'150 Seconds' won Best Short Film at the International Short Film Festival, Phoenix AZ. 'Ontoheen' screened at Goa Film Festival 2015.</p></li>
-      <li class="hl-card"><div class="hl-n" aria-hidden="true">06</div><div class="hl-cat">Photography · Luxury</div><h3 class="hl-t">Harley-Davidson · Ferrari · Lamborghini</h3><p class="hl-b">Commissioned photographer for Bharat Dalmia Group; featured by the National Museum. Premium branded content for global automotive icons.</p></li>
-      <li class="hl-card"><div class="hl-n" aria-hidden="true">07</div><div class="hl-cat">Events · Asia</div><h3 class="hl-t">India Mobile Congress 2017 &amp; 2018</h3><p class="hl-b">Spearheaded digital &amp; on-ground communications for Asia's largest technology forum — real-time coverage, live content, stakeholder amplification.</p></li>
-      <li class="hl-card"><div class="hl-n" aria-hidden="true">08</div><div class="hl-cat">Recognition</div><h3 class="hl-t">Best Celebrity PR Award</h3><p class="hl-b">Winner — Best Celebrity PR Award for Individual Image Perception. Also honoured at National School of Drama's International Theatre Competition.</p></li>
-    </ul>
-  </div>
+  <ul class="bento spot sr">
+    <li class="card xl"><div class="c-n" aria-hidden="true">01</div><div class="c-cat">Government · Scale</div><div class="c-big">10.8B</div><h3 class="c-t">National Digital Ecosystem</h3><p class="c-b">Steering digital strategy for MIB, MEA, MoPSW &amp; NHAI simultaneously — 10.8B annual impressions, 2M+ new followers, a ₹85L/month mandate at Avian We.</p><ul class="c-tags" aria-label="Ministries and agencies"><li>MIB</li><li>MEA</li><li>MoPSW</li><li>NHAI</li></ul></li>
+    <li class="card w2"><div class="c-n" aria-hidden="true">02</div><div class="c-cat">Revenue · Growth</div><div class="c-big">+19%</div><h3 class="c-t">Revenue Growth at popkorn</h3><p class="c-b">Full P&amp;L ownership of a ~₹95L/month agency vertical. Ran 13 brand mandates and launched an AI Marketing practice — up to 28% productivity improvement.</p></li>
+    <li class="card"><div class="c-n" aria-hidden="true">03</div><div class="c-cat">Entrepreneurship</div><h3 class="c-t">Founded MRKTNG Labs India</h3><p class="c-b">A boutique digital consultancy from inception — ₹15L/month, 4 real estate clients, team of 5.</p></li>
+    <li class="card"><div class="c-n" aria-hidden="true">04</div><div class="c-cat">Government · Flagship</div><h3 class="c-t">IndiaSkills &amp; WorldSkills India</h3><p class="c-b">End-to-end digital strategy for the Ministry of Skill Development's flagship national and international programmes.</p></li>
+    <li class="card w2"><div class="c-n" aria-hidden="true">05</div><div class="c-cat">Film · Awards</div><div class="c-big it">Best Short Film</div><h3 class="c-t">'150 Seconds' · Phoenix, Arizona</h3><p class="c-b">Winner at the International Short Film Festival, Phoenix AZ. 'Ontoheen' screened as an Official Selection at Goa Film Festival 2015.</p></li>
+    <li class="card"><div class="c-n" aria-hidden="true">06</div><div class="c-cat">Photography · Luxury</div><h3 class="c-t">Harley-Davidson · Ferrari · Lamborghini</h3><p class="c-b">Commissioned by Bharat Dalmia Group; featured by the National Museum.</p></li>
+    <li class="card"><div class="c-n" aria-hidden="true">07</div><div class="c-cat">Events · Asia</div><h3 class="c-t">India Mobile Congress 2017 &amp; 2018</h3><p class="c-b">Digital &amp; on-ground communications for Asia's largest technology forum.</p></li>
+    <li class="card w4"><div class="c-cat">Recognition</div><h3 class="c-t">Best Celebrity PR Award</h3><p class="c-b">Winner for Individual Image Perception. Also honoured at the National School of Drama's International Theatre Competition.</p></li>
+  </ul>
 </section>
 
 <!-- CLIENTS -->
-<section class="clients-sec sr" aria-labelledby="cl-label">
-  <h2 class="cl-label" id="cl-label">Selected clients &amp; brands</h2>
-  <ul class="cl-grid">
-    <li class="cl-item">Facebook</li><li class="cl-item">Ministry of I&amp;B</li>
-    <li class="cl-item">Ministry of External Affairs</li><li class="cl-item">Ministry of Ports, Shipping &amp; Waterways</li>
-    <li class="cl-item">NHAI</li><li class="cl-item">Skill India / NSDC</li><li class="cl-item">Department of Biotechnology</li>
-    <li class="cl-item">BharatPe</li><li class="cl-item">Canon India</li>
-    <li class="cl-item">NTPC</li><li class="cl-item">Schaeffler India</li>
-    <li class="cl-item">Obeetee Carpets</li><li class="cl-item">Honda Motorcycles</li>
-    <li class="cl-item">UN Global Compact</li><li class="cl-item">TARC</li>
-    <li class="cl-item">Trevoc</li><li class="cl-item">Mann Fleet Partners</li>
-    <li class="cl-item">Pacific Malls</li><li class="cl-item">Pirelli Tyres</li>
-    <li class="cl-item">Harley-Davidson</li><li class="cl-item">Ferrari</li>
-    <li class="cl-item">Lamborghini</li><li class="cl-item">India Brand Equity Foundation</li><li class="cl-item">Coffee Board of India</li>
-    <li class="cl-item">Kailash Satyarthi Children's Foundation</li><li class="cl-item">TESCO</li>
+<section class="clients" aria-labelledby="cl-label">
+  <div class="cl-head sr">
+    <h2 class="cl-label" id="cl-label">Selected clients &amp; brands</h2>
+    <span class="cl-count" aria-hidden="true">Ministries, multinationals &amp; icons</span>
+  </div>
+  <ul class="sr-only cl-list-print">
+    <li>Ministry of Information &amp; Broadcasting</li><li>Ministry of External Affairs</li><li>Ministry of Ports, Shipping &amp; Waterways</li><li>NHAI</li><li>Skill India / NSDC</li><li>Department of Biotechnology</li><li>Facebook</li><li>TESCO</li><li>BharatPe</li><li>Canon India</li><li>NTPC</li><li>Schaeffler India</li><li>Obeetee Carpets</li><li>Honda Motorcycles</li><li>UN Global Compact</li><li>India Brand Equity Foundation</li><li>Coffee Board of India</li><li>Kailash Satyarthi Children's Foundation</li><li>Pirelli Tyres</li><li>Pacific Malls</li><li>TARC</li><li>Trevoc</li><li>Mann Fleet Partners</li><li>Harley-Davidson</li><li>Ferrari</li><li>Lamborghini</li><li>Padma Bhushan Sudha Murty</li>
   </ul>
+  <div class="mq" aria-hidden="true">
+    <div class="mq-track"><span class="mq-i">Ministry of I&amp;B</span><span class="mq-i">Ministry of External Affairs</span><span class="mq-i">Ministry of Ports, Shipping &amp; Waterways</span><span class="mq-i">NHAI</span><span class="mq-i">Skill India / NSDC</span><span class="mq-i">Department of Biotechnology</span><span class="mq-i">Facebook</span><span class="mq-i">TESCO</span><span class="mq-i">UN Global Compact</span><span class="mq-i">Honda Motorcycles</span><span class="mq-i">NTPC</span><span class="mq-i">Canon India</span><span class="mq-i">BharatPe</span></div>
+    <div class="mq-track" aria-hidden="true"><span class="mq-i">Ministry of I&amp;B</span><span class="mq-i">Ministry of External Affairs</span><span class="mq-i">Ministry of Ports, Shipping &amp; Waterways</span><span class="mq-i">NHAI</span><span class="mq-i">Skill India / NSDC</span><span class="mq-i">Department of Biotechnology</span><span class="mq-i">Facebook</span><span class="mq-i">TESCO</span><span class="mq-i">UN Global Compact</span><span class="mq-i">Honda Motorcycles</span><span class="mq-i">NTPC</span><span class="mq-i">Canon India</span><span class="mq-i">BharatPe</span></div>
+  </div>
+  <div class="mq rev" aria-hidden="true">
+    <div class="mq-track"><span class="mq-i">Harley-Davidson</span><span class="mq-i">Ferrari</span><span class="mq-i">Lamborghini</span><span class="mq-i">Pirelli Tyres</span><span class="mq-i">Schaeffler India</span><span class="mq-i">India Brand Equity Foundation</span><span class="mq-i">Coffee Board of India</span><span class="mq-i">Kailash Satyarthi Children's Foundation</span><span class="mq-i">Sudha Murty</span><span class="mq-i">Obeetee Carpets</span><span class="mq-i">Pacific Malls</span><span class="mq-i">TARC</span><span class="mq-i">Trevoc</span><span class="mq-i">Mann Fleet Partners</span></div>
+    <div class="mq-track" aria-hidden="true"><span class="mq-i">Harley-Davidson</span><span class="mq-i">Ferrari</span><span class="mq-i">Lamborghini</span><span class="mq-i">Pirelli Tyres</span><span class="mq-i">Schaeffler India</span><span class="mq-i">India Brand Equity Foundation</span><span class="mq-i">Coffee Board of India</span><span class="mq-i">Kailash Satyarthi Children's Foundation</span><span class="mq-i">Sudha Murty</span><span class="mq-i">Obeetee Carpets</span><span class="mq-i">Pacific Malls</span><span class="mq-i">TARC</span><span class="mq-i">Trevoc</span><span class="mq-i">Mann Fleet Partners</span></div>
+  </div>
 </section>
 
 <!-- EDUCATION -->
@@ -1028,10 +799,10 @@ footer{
     <span class="s-label">Education &amp; Recognition</span>
   </div>
   <h2 class="disp sr">Formally grounded.<br><em>Perpetually curious.</em></h2>
-  <div class="edu-cards">
-    <div class="edu-c sr d1"><div class="edu-ghost" aria-hidden="true">01</div><div class="edu-yr">2019 – 2020</div><h3 class="edu-d">PG Diploma in Digital Marketing &amp; Communication</h3><div class="edu-i">MICA — Mudra Institute of Communications, Ahmedabad</div></div>
-    <div class="edu-c sr d2"><div class="edu-ghost" aria-hidden="true">02</div><div class="edu-yr">2017</div><h3 class="edu-d">Certificate in Social Media in PR &amp; Digital Marketing</h3><div class="edu-i">National University of Singapore</div></div>
-    <div class="edu-c sr d3"><div class="edu-ghost" aria-hidden="true">03</div><div class="edu-yr">2011 – 2014</div><h3 class="edu-d">Bachelor of Journalism &amp; Mass Communication</h3><div class="edu-i">Amity University, Delhi — Cinematography &amp; Film Production</div><div class="edu-note">↳ Best Short Film · Int'l Film Festival, Phoenix AZ</div></div>
+  <div class="edu-cards spot sr">
+    <div class="card"><div class="edu-ghost" aria-hidden="true">01</div><div class="edu-yr">2019 – 2020</div><h3 class="edu-d">PG Diploma in Digital Marketing &amp; Communication</h3><div class="edu-i">MICA — Mudra Institute of Communications, Ahmedabad</div></div>
+    <div class="card"><div class="edu-ghost" aria-hidden="true">02</div><div class="edu-yr">2017</div><h3 class="edu-d">Certificate in Social Media in PR &amp; Digital Marketing</h3><div class="edu-i">National University of Singapore</div></div>
+    <div class="card"><div class="edu-ghost" aria-hidden="true">03</div><div class="edu-yr">2011 – 2014</div><h3 class="edu-d">Bachelor of Journalism &amp; Mass Communication</h3><div class="edu-i">Amity University, Delhi — Cinematography &amp; Film Production</div><div class="edu-note">↳ Best Short Film · Int'l Film Festival, Phoenix AZ</div></div>
   </div>
   <div class="ac-grid">
     <div class="ac-col sr">
@@ -1072,10 +843,10 @@ footer{
     <span class="s-label">Martech Stack</span>
   </div>
   <h2 class="disp sr">Tools deployed<br>at <em>every level of the funnel.</em></h2>
-  <div class="mt-grid sr">
-    <div class="mt-col"><h3 class="mt-head">Analytics &amp; Performance</h3><ul class="mt-tags"><li class="mt-tag">Google Analytics GA4</li><li class="mt-tag">Meta Ads Manager</li><li class="mt-tag">LinkedIn Campaign Manager</li><li class="mt-tag">SEO Tools</li></ul></div>
-    <div class="mt-col"><h3 class="mt-head">Creative &amp; Production</h3><ul class="mt-tags"><li class="mt-tag">Adobe Creative Suite</li><li class="mt-tag">After Effects</li><li class="mt-tag">Video Editing &amp; Motion Graphics</li></ul></div>
-    <div class="mt-col"><h3 class="mt-head">AI &amp; Automation</h3><ul class="mt-tags"><li class="mt-tag">AI Content &amp; Design Tools</li><li class="mt-tag">Marketing Automation Platforms</li><li class="mt-tag">CMS Platforms</li></ul></div>
+  <div class="mt-grid spot sr">
+    <div class="card"><h3 class="mt-head">Analytics &amp; Performance</h3><ul class="mt-tags"><li class="mt-tag">Google Analytics GA4</li><li class="mt-tag">Meta Ads Manager</li><li class="mt-tag">LinkedIn Campaign Manager</li><li class="mt-tag">SEO Tools</li></ul></div>
+    <div class="card"><h3 class="mt-head">Creative &amp; Production</h3><ul class="mt-tags"><li class="mt-tag">Adobe Creative Suite</li><li class="mt-tag">After Effects</li><li class="mt-tag">Video Editing &amp; Motion Graphics</li></ul></div>
+    <div class="card"><h3 class="mt-head">AI &amp; Automation</h3><ul class="mt-tags"><li class="mt-tag">AI Content &amp; Design Tools</li><li class="mt-tag">Marketing Automation Platforms</li><li class="mt-tag">CMS Platforms</li></ul></div>
   </div>
 </section>
 
@@ -1091,11 +862,15 @@ footer{
   <div class="con-txt">
     <div class="con-super">06 — Contact</div>
     <h2 class="con-head sr" id="con-head">Let's build<br><em>something bold.</em></h2>
-    <div class="con-list sr d1">
-      <a class="con-row" href="mailto:bireshwar.chakravarty@gmail.com"><span class="con-k">Email</span><span class="con-v">bireshwar.chakravarty@gmail.com</span></a>
-      <a class="con-row" href="tel:+919971800625"><span class="con-k">Phone</span><span class="con-v">+91 99718 00625</span></a>
-      <a class="con-row" href="https://www.linkedin.com/in/bireshwarchakravarty/" target="_blank" rel="noopener noreferrer"><span class="con-k">LinkedIn</span><span class="con-v">linkedin.com/in/bireshwarchakravarty</span></a>
-      <div class="con-row"><span class="con-k">Location</span><span class="con-v">Delhi NCR, India</span></div>
+    <div class="con-ctas sr d1">
+      <button class="btn big mag" type="button" id="copyMail" data-mail="bireshwar.chakravarty@gmail.com">Copy email <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7"/><path d="M1.5 8.5v-7h7"/></svg></button>
+      <a class="btn big ghost mag" href="assets/Bireshwar_Chakravarty_Resume_2026.pdf" download>Download résumé <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M6 1v8M2.5 5.5 6 9l3.5-3.5M1 11h10"/></svg></a>
+    </div>
+    <div class="con-list sr d2">
+      <a class="con-row" href="mailto:bireshwar.chakravarty@gmail.com"><span class="con-k">Email</span><span class="con-v">bireshwar.chakravarty@gmail.com<span class="arr" aria-hidden="true">↗</span></span></a>
+      <a class="con-row" href="tel:+919971800625"><span class="con-k">Phone</span><span class="con-v">+91 99718 00625<span class="arr" aria-hidden="true">↗</span></span></a>
+      <a class="con-row" href="https://www.linkedin.com/in/bireshwarchakravarty/" target="_blank" rel="noopener noreferrer"><span class="con-k">LinkedIn</span><span class="con-v">linkedin.com/in/bireshwarchakravarty<span class="arr" aria-hidden="true">↗</span></span></a>
+      <div class="con-row"><span class="con-k">Location</span><span class="con-v">Delhi NCR, India · <span data-time>IST</span></span></div>
     </div>
   </div>
 </section>
@@ -1104,12 +879,16 @@ footer{
 
 <footer>
   <div class="ft-l">Bireshwar Chakravarty</div>
-  <div class="ft-r">© <span data-year>2026</span> · Director · Digital Strategy · Delhi NCR</div>
+  <div class="ft-m">© <span data-year>2026</span> · Director · Digital Strategy · Delhi NCR</div>
+  <a class="ft-r" href="#top">Back to top <span aria-hidden="true">↑</span></a>
 </footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <script>
 (()=>{
 const d=document,root=d.documentElement,$=id=>d.getElementById(id);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fine=matchMedia('(hover: hover) and (pointer: fine)').matches;
 const hasIO='IntersectionObserver' in window;
 const once=(els,fn,threshold)=>{
   if(!hasIO){els.forEach(fn);return}
@@ -1117,86 +896,198 @@ const once=(els,fn,threshold)=>{
   els.forEach(el=>o.observe(el));
 };
 
-// Current year
-const yr=String(new Date().getFullYear());
-d.querySelectorAll('[data-year]').forEach(el=>el.textContent=yr);
+// Year + live New Delhi time
+d.querySelectorAll('[data-year]').forEach(el=>el.textContent=new Date().getFullYear());
+const tFmt=new Intl.DateTimeFormat('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Kolkata'});
+const clock=()=>{const t=tFmt.format(new Date())+' IST';d.querySelectorAll('[data-time]').forEach(el=>el.textContent=t)};
+clock();setInterval(clock,30000);
 
-// Custom cursor — fine pointers only, rAF runs only while the ring is catching up
-if(!reduce&&matchMedia('(hover: hover) and (pointer: fine)').matches){
+// Hero: split the name into letters for the reveal
+if(!reduce){
+  const h=$('hName');h.setAttribute('aria-label','Bireshwar Chakravarty');h.classList.add('split');
+  let i=0;
+  h.querySelectorAll('.h-name').forEach(n=>{
+    const t=n.textContent;n.textContent='';n.setAttribute('aria-hidden','true');
+    for(const c of t){const s=d.createElement('span');s.className='ch';s.style.setProperty('--i',i++);s.textContent=c;n.appendChild(s)}
+  });
+}
+
+// Hero: rotating role line
+const rot=$('rot');
+if(rot&&!reduce){
+  const items=[...rot.children];let k=0;
+  setInterval(()=>{
+    const cur=items[k];k=(k+1)%items.length;const nx=items[k];
+    cur.classList.remove('on');cur.classList.add('out');
+    nx.classList.remove('out');nx.classList.add('on');
+    setTimeout(()=>cur.classList.remove('out'),800);
+  },3000);
+}
+
+// Hero: live impressions counter (10.8B a year ≈ 342 per second)
+const liveN=$('liveN');
+if(liveN){
+  const rate=10.8e9/(365*24*3600),t0=Date.now(),nf=new Intl.NumberFormat('en-IN');
+  setInterval(()=>{liveN.textContent=nf.format(Math.floor((Date.now()-t0)/1000*rate))},reduce?1000:90);
+}
+
+// Hero: pointer spotlight + photo parallax
+if(fine&&!reduce){
+  const hero=$('top'),hl=$('heroL'),hr=$('heroR');let raf=0,ev;
+  hero.addEventListener('pointermove',e=>{ev=e;if(raf)return;raf=requestAnimationFrame(()=>{raf=0;
+    const r=hero.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width,y=(ev.clientY-r.top)/r.height;
+    hl.style.setProperty('--sx',(ev.clientX-r.left)+'px');hl.style.setProperty('--sy',(ev.clientY-r.top)+'px');
+    hr.style.setProperty('--mx',(x-.5).toFixed(3));hr.style.setProperty('--my',(y-.5).toFixed(3));
+  })});
+}
+
+// Custom cursor + magnetic buttons
+if(!reduce&&fine){
   root.classList.add('cur-on');
   const c1=$('cur'),c2=$('cur2');
   let mx=0,my=0,rx=0,ry=0,raf=0;
   const pos=(el,x,y)=>el.style.transform=`translate(${x}px,${y}px) translate(-50%,-50%)`;
-  const follow=()=>{
-    rx+=(mx-rx)*.12;ry+=(my-ry)*.12;pos(c2,rx,ry);
-    raf=Math.abs(mx-rx)+Math.abs(my-ry)>.2?requestAnimationFrame(follow):0;
-  };
+  const follow=()=>{rx+=(mx-rx)*.16;ry+=(my-ry)*.16;pos(c2,rx,ry);raf=Math.abs(mx-rx)+Math.abs(my-ry)>.2?requestAnimationFrame(follow):0};
   d.addEventListener('mousemove',e=>{
     mx=e.clientX;my=e.clientY;pos(c1,mx,my);
     if(!root.classList.contains('cur-in')){rx=mx;ry=my;pos(c2,rx,ry);root.classList.add('cur-in')}
     if(!raf)raf=requestAnimationFrame(follow);
   },{passive:true});
   root.addEventListener('mouseleave',()=>root.classList.remove('cur-in'));
-  d.addEventListener('mouseover',e=>root.classList.toggle('cur-hover',!!e.target.closest('a,button,.hl-card,.cap,.mt-tag,.cl-item')));
+  d.addEventListener('mouseover',e=>root.classList.toggle('cur-hover',!!e.target.closest('a,button,.mq-i,.cap,.mt-tag')));
+  d.querySelectorAll('.mag').forEach(b=>{
+    b.addEventListener('pointermove',e=>{const r=b.getBoundingClientRect();b.style.transform=`translate(${(e.clientX-r.left-r.width/2)*.25}px,${(e.clientY-r.top-r.height/2)*.35}px)`});
+    b.addEventListener('pointerleave',()=>b.style.transform='');
+  });
 }
 
-// Scroll progress + nav background (rAF-throttled, no layout reads on scroll)
-const fill=$('sprog-fill'),nav=$('nav');
-let maxY=1,ticking=false;
+// Spotlight cards: one glow follows the pointer across a whole grid
+if(fine&&!reduce){
+  d.querySelectorAll('.spot').forEach(g=>{
+    const cards=[...g.querySelectorAll('.card')];let raf=0,ev;
+    g.addEventListener('pointermove',e=>{ev=e;if(raf)return;raf=requestAnimationFrame(()=>{raf=0;
+      for(const c of cards){const r=c.getBoundingClientRect();c.style.setProperty('--x',(ev.clientX-r.left)+'px');c.style.setProperty('--y',(ev.clientY-r.top)+'px')}
+    })});
+    g.addEventListener('pointerleave',()=>cards.forEach(c=>{c.style.setProperty('--x','-999px');c.style.setProperty('--y','-999px')}));
+  });
+}
+
+// Manifesto: words light up as it scrolls through the viewport
+const man=$('manifesto');let words=[];
+if(man&&!reduce){
+  const label=man.textContent.replace(/\s+/g,' ').trim();
+  const wrap=node=>{
+    [...node.childNodes].forEach(n=>{
+      if(n.nodeType===3){
+        const frag=d.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach(p=>{if(!p)return;if(/^\s+$/.test(p))frag.appendChild(d.createTextNode(p));else{const s=d.createElement('span');s.className='w';s.textContent=p;frag.appendChild(s)}});
+        n.replaceWith(frag);
+      }else wrap(n);
+    });
+  };
+  wrap(man);words=[...man.querySelectorAll('.w')];
+  const sr=d.createElement('span');sr.className='sr-only';sr.textContent=label;
+  const vis=d.createElement('span');vis.setAttribute('aria-hidden','true');
+  while(man.firstChild)vis.appendChild(man.firstChild);
+  man.append(sr,vis);
+}
+
+// Timeline sticky panel
+const tlItems=[...d.querySelectorAll('.tl-item')],tlYear=$('tlYear'),tlCo=$('tlCo'),tlRole=$('tlRole'),tlBar=$('tlBar'),tlCount=$('tlCount'),tlList=$('tlList');
+let tlActive=-1;
+const setTl=i=>{
+  if(i===tlActive)return;tlActive=i;const it=tlItems[i];
+  tlItems.forEach((x,j)=>x.classList.toggle('on',j===i));
+  if(tlYear.textContent!==it.dataset.y){tlYear.classList.add('flip');tlYear.textContent=it.dataset.y;void tlYear.offsetWidth;tlYear.classList.remove('flip')}
+  tlCo.textContent=it.querySelector('.tl-company').textContent;
+  tlRole.textContent=it.querySelector('.tl-rl').textContent;
+  tlCount.textContent=String(i+1).padStart(2,'0')+' / '+String(tlItems.length).padStart(2,'0');
+};
+
+// One scroll loop: progress, nav, manifesto, timeline, section index
+const fill=$('sprog-fill'),nav=$('nav'),sidx=$('sidx');
+const sideLinks=[...sidx.querySelectorAll('a')],secs=sideLinks.map(a=>$(a.dataset.s));
+const navLinks=[...d.querySelectorAll('.nav-links a[href^="#"]')];
+let maxY=1,lastY=scrollY,ticking=false,litCount=-1;
 const measure=()=>{maxY=Math.max(1,root.scrollHeight-innerHeight)};
-const paint=()=>{ticking=false;const y=scrollY;fill.style.transform=`scaleX(${Math.min(1,y/maxY)})`;nav.classList.toggle('dark',y>60)};
+const paint=()=>{
+  ticking=false;const y=scrollY,vh=innerHeight;
+  fill.style.transform=`scaleX(${Math.min(1,y/maxY)})`;
+  nav.classList.toggle('dark',y>60);
+  if(Math.abs(y-lastY)>4){nav.classList.toggle('hide',y>lastY&&y>vh*.9);lastY=y}
+  sidx.classList.toggle('show',y>vh*.6);
+  if(words.length){
+    const r=man.getBoundingClientRect(),p=Math.min(1,Math.max(0,(vh*.85-r.top)/(r.height+vh*.25)));
+    const n=Math.round(p*words.length);
+    if(n!==litCount){litCount=n;words.forEach((w,i)=>w.classList.toggle('on',i<n))}
+  }
+  if(tlItems.length){
+    let a=0;tlItems.forEach((it,i)=>{if(it.getBoundingClientRect().top<vh*.5)a=i});setTl(a);
+    const lr=tlList.getBoundingClientRect();tlBar.style.transform=`scaleX(${Math.min(1,Math.max(0,(vh*.5-lr.top)/lr.height))})`;
+  }
+  let s=0;secs.forEach((el,i)=>{if(el&&el.getBoundingClientRect().top<vh*.45)s=i});
+  sideLinks.forEach((a,i)=>a.classList.toggle('on',i===s));
+  const id=secs[s]&&secs[s].id;navLinks.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+id));
+};
 addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(paint)}},{passive:true});
-addEventListener('resize',measure,{passive:true});
+addEventListener('resize',()=>{measure();paint()},{passive:true});
 if('ResizeObserver' in window)new ResizeObserver(measure).observe(d.body);
 measure();paint();
+nav.addEventListener('focusin',()=>nav.classList.remove('hide'));
+
+// Ticker: drifts on its own, speeds up and leans with scroll velocity
+const tk=$('ticker');
+if(tk&&!reduce){
+  let x=0,v=0,prevY=scrollY,visible=true,running=false;
+  const loop=()=>{
+    const w=tk.scrollWidth/2,y=scrollY,dy=y-prevY;prevY=y;
+    v+=(dy-v)*.12;
+    x-=0.6+Math.min(40,Math.abs(v)*.35);if(w&&-x>=w)x+=w;
+    tk.style.transform=`translate3d(${x}px,0,0) skewX(${Math.max(-12,Math.min(12,-v*.25))}deg)`;
+    if(visible)requestAnimationFrame(loop);else running=false;
+  };
+  const start=()=>{if(!running){running=true;prevY=scrollY;requestAnimationFrame(loop)}};
+  if(hasIO)new IntersectionObserver(es=>{visible=es[0].isIntersecting;if(visible)start()}).observe(tk.parentElement);
+  start();
+}
 
 // Mobile menu
 const tgl=$('nav-toggle'),tglT=tgl.querySelector('.nav-toggle-t');
-const setMenu=open=>{nav.classList.toggle('open',open);tgl.setAttribute('aria-expanded',open);tglT.textContent=open?'Close':'Menu'};
+const setMenu=open=>{nav.classList.toggle('open',open);if(open)nav.classList.remove('hide');tgl.setAttribute('aria-expanded',open);tglT.textContent=open?'Close':'Menu'};
 tgl.addEventListener('click',()=>setMenu(!nav.classList.contains('open')));
 $('nav-menu').addEventListener('click',e=>{if(e.target.closest('a'))setMenu(false)});
 d.addEventListener('keydown',e=>{if(e.key==='Escape'&&nav.classList.contains('open')){setMenu(false);tgl.focus()}});
 
-// Experience accordion
-d.querySelectorAll('.exp-top').forEach(btn=>btn.addEventListener('click',()=>{
-  const row=btn.closest('.exp-row'),open=!row.classList.contains('open');
-  row.classList.toggle('open',open);btn.setAttribute('aria-expanded',open);
-}));
-
-// Scroll reveal
+// Scroll reveal + language bars
 const sr=d.querySelectorAll('.sr');
-if(reduce)sr.forEach(el=>el.classList.add('go'));else once(sr,el=>el.classList.add('go'),.07);
-
-// Language bars
+if(reduce)sr.forEach(el=>el.classList.add('go'));else once(sr,el=>el.classList.add('go'),.08);
 once(d.querySelectorAll('.lang-grid'),el=>el.querySelectorAll('.lang-f').forEach(f=>f.classList.add('go')),.3);
 
-// Counters (final values are in the HTML; animate only when motion is OK)
+// Counters (final values live in the HTML)
 let settled=false;
-const finalCount=el=>el.textContent=el.dataset.count+(el.dataset.sfx||'');
+const fmt=(el,v)=>(el.dataset.pre||'')+v.toFixed(+(el.dataset.dec||0))+(el.dataset.sfx||'');
+const finalCount=el=>el.textContent=fmt(el,+el.dataset.count);
 if(!reduce&&hasIO){
   const run=el=>{
-    const t=+el.dataset.count,sfx=el.dataset.sfx||'',t0=performance.now();
-    const step=now=>{if(settled)return finalCount(el);const p=Math.min((now-t0)/1500,1);el.textContent=Math.floor((1-Math.pow(1-p,3))*t)+(p>=1?sfx:'');if(p<1)requestAnimationFrame(step)};
+    const t=+el.dataset.count,t0=performance.now(),dur=1600,dec=!!el.dataset.dec;
+    const step=now=>{if(settled)return finalCount(el);const p=Math.min((now-t0)/dur,1),e=1-Math.pow(1-p,4);
+      el.textContent=fmt(el,p>=1?t:dec?t*e:Math.floor(t*e));if(p<1)requestAnimationFrame(step)};
     requestAnimationFrame(step);
   };
-  d.querySelectorAll('[data-count]').forEach(el=>el.textContent='0');
-  once(d.querySelectorAll('.nums,.h-stats'),el=>el.querySelectorAll('[data-count]').forEach(run),.4);
+  d.querySelectorAll('[data-count]').forEach(el=>el.textContent=fmt(el,0));
+  once(d.querySelectorAll('.h-stats,.scale-grid'),el=>el.querySelectorAll('[data-count]').forEach(run),.35);
 }
 
-// Highlights carousel: drag, arrow buttons
-const hl=$('hlO'),prev=$('hlPrev'),next=$('hlNext');
-let drag=false,sx=0,sl=0;
-hl.addEventListener('mousedown',e=>{if(e.button)return;drag=true;sx=e.pageX;sl=hl.scrollLeft;hl.classList.add('dragging')});
-addEventListener('mouseup',()=>{if(drag){drag=false;hl.classList.remove('dragging')}});
-hl.addEventListener('mousemove',e=>{if(!drag)return;e.preventDefault();hl.scrollLeft=sl-(e.pageX-sx)*1.5});
-const step=()=>(hl.querySelector('.hl-card')?.offsetWidth||340)*2;
-prev.addEventListener('click',()=>hl.scrollBy({left:-step(),behavior:reduce?'auto':'smooth'}));
-next.addEventListener('click',()=>hl.scrollBy({left:step(),behavior:reduce?'auto':'smooth'}));
-const arrows=()=>{prev.disabled=hl.scrollLeft<=2;next.disabled=hl.scrollLeft>=hl.scrollWidth-hl.clientWidth-2};
-hl.addEventListener('scroll',arrows,{passive:true});addEventListener('resize',arrows,{passive:true});arrows();
+// Copy email
+const toast=$('toast');let tt;
+const say=m=>{toast.textContent=m;toast.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>toast.classList.remove('show'),2400)};
+$('copyMail').addEventListener('click',e=>{
+  const m=e.currentTarget.dataset.mail;
+  (navigator.clipboard?navigator.clipboard.writeText(m):Promise.reject()).then(()=>say('Email copied'),()=>{location.href='mailto:'+m});
+});
 
-// Print: make sure everything is revealed
-addEventListener('beforeprint',()=>{settled=true;d.querySelectorAll('[data-count]').forEach(finalCount);sr.forEach(el=>el.classList.add('go'));d.querySelectorAll('.lang-f').forEach(f=>f.classList.add('go'))});
+// Print: everything in its final state
+addEventListener('beforeprint',()=>{settled=true;d.querySelectorAll('[data-count]').forEach(finalCount);sr.forEach(el=>el.classList.add('go'));words.forEach(w=>w.classList.add('on'));d.querySelectorAll('.lang-f').forEach(f=>f.classList.add('go'))});
 })();
 </script>
 </body>
