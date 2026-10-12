@@ -29,3 +29,14 @@ cp backup/index-original-2026-10-12.html index.html
 ```
 
 The original is also in git history (commit `1c4e4da`).
+
+## Résumé PDF
+
+`assets/Bireshwar_Chakravarty_Resume_2026.pdf` is generated from `resume/resume.html`, styled to match the site.
+Edit the HTML, then rebuild with:
+
+```
+node resume/build.js
+```
+
+The script needs the `playwright` package. It refuses to write the PDF if either page's content runs past the A4 sheet.
