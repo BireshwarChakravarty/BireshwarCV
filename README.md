@@ -32,7 +32,7 @@ cp backup/index-original-2026-10-12.html index.html
 
 The original is also in git history (commit `1c4e4da`).
 
-## Résumé PDF
+## Resume PDF
 
 `assets/Bireshwar_Chakravarty_Resume_2026.pdf` is generated from `resume/resume.html`, styled to match the site.
 Edit the HTML, then rebuild with:
