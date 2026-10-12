@@ -9,8 +9,9 @@ assets/
   portrait-768.webp/.jpg
   portrait-1024.webp/.jpg
   og.jpg                   1200×630 link-preview image (LinkedIn, WhatsApp, X)
-  favicon.svg              browser tab icon
-  apple-touch-icon.png     home-screen icon
+  favicon-v2.svg/.ico      browser tab icons (versioned filenames so browsers fetch the new icon)
+  favicon-32-v2.png        PNG tab icon (Safari)
+  apple-touch-icon-v2.png  home-screen icon
 backup/
   index-original-2026-10-12.html   untouched copy of the page before the 2026-10 audit fixes
 ```
