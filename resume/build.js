@@ -12,10 +12,13 @@ const { chromium } = require('playwright');
   await page.evaluate(() => document.fonts.ready);
 
   // Fail loudly if either page's content runs past the A4 sheet.
+  // Slack = how far the footer's bottom edge sits from the bottom of the A4 sheet
+  // (negative = room left). Header, stat strip and footer never shrink, so any
+  // overflow pushes the footer past the sheet and is caught here.
   const overflow = await page.evaluate(() =>
     [...document.querySelectorAll('.page')].map(p => {
-      const body = p.querySelector('.body'), ft = p.querySelector('.ft');
-      return Math.round(body.lastElementChild.getBoundingClientRect().bottom - ft.getBoundingClientRect().top);
+      const ft = p.querySelector('.ft');
+      return Math.round(ft.getBoundingClientRect().bottom - p.getBoundingClientRect().bottom);
     })
   );
   console.log('slack per page (px, negative = room left):', overflow.join(', '));
